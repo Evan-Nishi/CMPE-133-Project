@@ -1,13 +1,12 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './Components/navbarComponent/Navbar';
-import Home from './Pages/HomePages/HomePage';
-import AboutPage from './Pages/AboutPages/AboutPage'
+import Navbar from './Components/Navbar';
+import Home from './Pages/HomePage';
+import AboutPage from './Pages/AboutPage'
 
 
 const App = () => {
-
   return (
     <Router>
       <div>
