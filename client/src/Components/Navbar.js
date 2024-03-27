@@ -1,14 +1,32 @@
 // Navbar.js
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
-    <nav className= "flex justify-between bg-medBlue p-2">
-      <h1 className= 'w-full text-3xl font-bold text-darkBlue'> FrentoMeet</h1>
+    <nav className="flex justify-between bg-medBlue p-2">
+      <h1 className="w-full text-3xl font-bold text-darkBlue"> FrentoMeet</h1>
       <ul className="flex">
-        <li className='p-2'><Link to="/" className="text-white hover:bg-lightBlue">Home</Link></li>
-        <li className ='p-2'><Link to="/about" className="text-white hover:bg-lightBlue">About</Link></li>
+        <li className="p-2">
+          <Link to="/" className="text-white hover:bg-lightBlue">
+            Home
+          </Link>
+        </li>
+        <li className="p-2">
+          <Link to="/about" className="text-white hover:bg-lightBlue">
+            About
+          </Link>
+        </li>
+        <li className="p-2">
+          <Link to="/signup" className="text-white hover:bg-lightBlue">
+            SignUp
+          </Link>
+        </li>
+        <li className="p-2">
+          <Link to="/login" className="text-white hover:bg-lightBlue">
+            Login
+          </Link>
+        </li>
       </ul>
     </nav>
   );
