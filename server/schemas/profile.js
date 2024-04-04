@@ -20,14 +20,14 @@ const Week = new Schema({
 
 const profileSchema = new Schema({
     //need friends field, simply an array _id of friends
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
+    username: {
         type: String,
         required: true,
         unique: true,
+    },
+    password: {
+        type: String,
+        required: true,
     },
     schedule: Week,
     friends: [{
