@@ -29,7 +29,18 @@ const profileSchema = new Schema({
         type: String,
         required: true,
     },
-    schedule: Week,
+    schedule: {
+        type: Week,
+        default: () => ({
+            sunday: { slots: Array(96).fill(0) },
+            monday: { slots: Array(96).fill(0) },
+            tuesday: { slots: Array(96).fill(0) },
+            wednesday: { slots: Array(96).fill(0) },
+            thursday: { slots: Array(96).fill(0) },
+            friday: { slots: Array(96).fill(0) },
+            saturday: { slots: Array(96).fill(0) },
+        }),
+    },
     friends: [{
         type: Schema.Types.ObjectId,
         ref: 'Profile',

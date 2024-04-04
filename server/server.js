@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 
 import login from './routes/login.js'
 import createAccount from './routes/createUser.js'
+import Profile from './schemas/profile.js';
 
 const app = express();
 const port = process.env.DEFAULT_PORT; 
@@ -31,6 +32,22 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
     res.send('Home URL')
 })
+app.get('/users', async (req, res) => {
+  try {
+    const profiles = await Profile.find({});
+    res.json(profiles);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+app.delete('/users', async (req, res) => {
+  try {
+    await Profile.deleteMany({});
+    res.json({ message: 'All users deleted' });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 app.use(login);
 app.use(createAccount)
 
