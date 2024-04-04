@@ -3,8 +3,8 @@ const { Schema } = mongoose
 
 const Day = new Schema({
     slots: {
-        type: [Boolean],
-        default: () => Array(96).fill(false), // 96 x 15 minute time slots in a day
+        type: [Number],
+        default: () => Array(96).fill(0), // 96 x 15 minute time slots in a day
     },
 }, { _id: false });
 
@@ -20,16 +20,27 @@ const Week = new Schema({
 
 const profileSchema = new Schema({
     //need friends field, simply an array _id of friends
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
+    username: {
         type: String,
         required: true,
         unique: true,
     },
-    schedule: Week,
+    password: {
+        type: String,
+        required: true,
+    },
+    schedule: {
+        type: Week,
+        default: () => ({
+            sunday: { slots: Array(96).fill(0) },
+            monday: { slots: Array(96).fill(0) },
+            tuesday: { slots: Array(96).fill(0) },
+            wednesday: { slots: Array(96).fill(0) },
+            thursday: { slots: Array(96).fill(0) },
+            friday: { slots: Array(96).fill(0) },
+            saturday: { slots: Array(96).fill(0) },
+        }),
+    },
     friends: [{
         type: Schema.Types.ObjectId,
         ref: 'Profile',
