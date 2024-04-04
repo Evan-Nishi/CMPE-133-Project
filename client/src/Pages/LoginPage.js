@@ -6,13 +6,15 @@ const Login = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
+    rememberMe: false,
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: newValue,
     });
   };
 
@@ -23,6 +25,7 @@ const Login = () => {
     setFormData({
       username: "",
       password: "",
+      rememberMe: formData.rememberMe,
     });
   };
 
@@ -59,6 +62,19 @@ const Login = () => {
               className="rounded-lg px-4 py-1 border"
               style={{ width: "500px" }}
             />
+          </div>
+          <div className="mb-6">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              name="rememberMe"
+              checked={formData.rememberMe}
+              onChange={handleChange}
+              className="mr-2"
+            />
+            <label htmlFor="rememberMe" className="font-bold">
+              Remember Me
+            </label>
           </div>
           <div>
             <Button
