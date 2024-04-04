@@ -3,8 +3,8 @@ const { Schema } = mongoose
 
 const Day = new Schema({
     slots: {
-        type: [Boolean],
-        default: () => Array(96).fill(false), // 96 x 15 minute time slots in a day
+        type: [Number],
+        default: () => Array(96).fill(0), // 96 x 15 minute time slots in a day
     },
 }, { _id: false });
 
