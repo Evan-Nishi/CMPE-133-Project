@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './Components/Navbar';
 import Home from './Pages/HomePage';
 import AboutPage from './Pages/AboutPage'
+import CreateEvent from './Components/CreateEvent';
 
 
 const App = () => {
