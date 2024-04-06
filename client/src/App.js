@@ -5,6 +5,9 @@ import SignUp from "./Pages/SignUpPage";
 import Login from "./Pages/LoginPage";
 import About from "./Pages/AboutPage";
 import Home from "./Pages/HomePage";
+import AboutPage from './Pages/AboutPage'
+import CreateEvent from './Components/CreateEvent';
+
 
 const App = () => {
   return (

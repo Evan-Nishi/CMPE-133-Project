@@ -11,6 +11,7 @@ module.exports = {
         paleBlue: "#CAF0F8",
 
       },
+      
     },
   },
   plugins: [],
