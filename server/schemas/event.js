@@ -26,6 +26,11 @@ const eventSchema = new Schema({
         type: Number, // 0-96, 0 is midnight, 96 is 11:45 PM
         required: true,
     },
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'Profile',
+        required: true,
+    },
 });
 
 const Event = mongoose.model('Event', eventSchema);
