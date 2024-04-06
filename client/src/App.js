@@ -1,20 +1,20 @@
-// App.js
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './Components/Navbar';
-import Home from './Pages/HomePage';
-import AboutPage from './Pages/AboutPage'
-
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./Components/Navbar";
+import SignUp from "./Pages/SignUpPage";
+import Login from "./Pages/LoginPage";
+import About from "./Pages/AboutPage";
+import Home from "./Pages/HomePage";
 
 const App = () => {
   return (
     <Router>
       <div>
-        <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<AboutPage />} />
-          {/* Add more routes for other pages */}
+          <Route path="/" element={<About />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={<Home />} />
         </Routes>
       </div>
     </Router>
