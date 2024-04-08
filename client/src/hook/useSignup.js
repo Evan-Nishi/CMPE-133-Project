@@ -10,7 +10,7 @@ export const useSignup = () => {
 
     const signup = async (username, password) => {
         setError(null);
-        const response = await fetch('http://localhost:5050/createAccount', {
+        const response = await fetch('/createAccount', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
