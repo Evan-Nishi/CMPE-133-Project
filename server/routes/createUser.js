@@ -12,7 +12,7 @@ router.post('/createAccount', express.json(), async (req, res) => {
         const exists = await Profile.findOne({ username }).exec();
 
         if (exists) {
-            return res.status(409).json({ message: 'Username is already taken' });
+            return res.status(409).json({ error: 'Username is already taken' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -30,7 +30,7 @@ router.post('/createAccount', express.json(), async (req, res) => {
             maxAge: maxAge,
         });
 
-        res.status(201).json({ message: 'Account created successfully' });
+        res.status(201).json({ message: 'Account created successfully', username});
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

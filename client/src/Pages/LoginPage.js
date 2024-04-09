@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../Components/Button";
 import Navbar from "../Components/Navbar";
+import { useLogin} from "../hook/useLogin"
+import { ToastContainer, toast } from "react-toastify";
 
 const Login = () => {
+  const {login, error} = useLogin()
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -18,16 +22,23 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    // Resets the form fields after successful submission
-    setFormData({
-      username: "",
-      password: "",
-      rememberMe: formData.rememberMe,
-    });
+    if (!formData.username || !formData.password) {
+        toast.error('Please fill in all fields');
+        return;
+    }
+
+    await login(formData.username, formData.password, formData.rememberMe);
+  
   };
+
+  useEffect(() => {
+  if (error) {
+    toast.error(error);
+  }
+}, [error]);
+
 
   return (
     <>
@@ -78,7 +89,6 @@ const Login = () => {
           </div>
           <div>
             <Button
-              to="/home"
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded"
             >
@@ -86,7 +96,9 @@ const Login = () => {
             </Button>
           </div>
         </form>
+      <ToastContainer autoClose={3000} position="top-right" />
       </div>
+      
     </>
   );
 };
