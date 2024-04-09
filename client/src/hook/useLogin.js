@@ -12,17 +12,19 @@ export const useLogin = () => {
         setError(null);
         const response = await fetch('/login', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password, rememberMe})
         });
         const json = await response.json();
 
+        console.log('login response:', json);
+
         if (!response.ok) {
             setError(json.error);
         } else {
-            localStorage.setItem('user', JSON.stringify(json));
             dispatch({ type: 'LOGIN', payload: json });
-            navigate('/'); // Redirect to home page
+            navigate('/'); 
 
         }
         

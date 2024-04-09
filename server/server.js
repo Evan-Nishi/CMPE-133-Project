@@ -7,6 +7,8 @@ import mongoose from 'mongoose';
 
 import login from './routes/login.js'
 import createAccount from './routes/createUser.js'
+import userSession from './routes/userSession.js'
+import logout from './routes/logout.js'
 import Profile from './schemas/profile.js';
 
 const app = express();
@@ -50,6 +52,8 @@ app.delete('/users', async (req, res) => {
 });
 app.use(login);
 app.use(createAccount)
+app.use(userSession);
+app.use(logout);
 
 app.listen(port, () => {
     console.log(`Express server listening on port: ${port}`);

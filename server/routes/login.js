@@ -24,7 +24,7 @@ router.post('/login', express.json(), async (req, res) => {
             sameSite: 'None',
             maxAge: maxAge,
         })
-        res.json({ message: 'Login successful!', username, token: login.token});
+        res.json({ message: 'Login successful!', username});
     } catch (error) {
         console.error('Login error: ', error);
         res.status(500).json({ message: 'An error occurred while processing your request' });

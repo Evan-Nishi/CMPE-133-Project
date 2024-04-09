@@ -30,7 +30,7 @@ router.post('/createAccount', express.json(), async (req, res) => {
             maxAge: maxAge,
         });
 
-        res.status(201).json({ message: 'Account created successfully', token: login.token, username});
+        res.status(201).json({ message: 'Account created successfully', username});
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

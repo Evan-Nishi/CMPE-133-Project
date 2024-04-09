@@ -12,6 +12,7 @@ export const useSignup = () => {
         setError(null);
         const response = await fetch('/createAccount', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
@@ -20,7 +21,6 @@ export const useSignup = () => {
         if (!response.ok) {
             setError(json.error);
         } else {
-            localStorage.setItem('user', JSON.stringify(json));
             dispatch({ type: 'LOGIN', payload: json });
             navigate('/')
         }
