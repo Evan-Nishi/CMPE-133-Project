@@ -1,7 +1,6 @@
 // SignUp.js
 import React, { useState, useEffect} from 'react';
 import Button from '../Components/Button';
-import Navbar from '../Components/Navbar';
 import { useSignup } from '../hook/useSignup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -45,7 +44,7 @@ const SignUp = () => {
 
     return (
         <>
-            <Navbar />
+         
             <div className="p-8">
                 <h2 className="mb-4 font-bold text-3xl">Sign Up</h2>
                 <form onSubmit={handleSubmit}>
