@@ -9,7 +9,10 @@ import login from './routes/login.js'
 import createAccount from './routes/createUser.js'
 import userSession from './routes/userSession.js'
 import logout from './routes/logout.js'
+import schedule from './routes/schedule.js';
+
 import Profile from './schemas/profile.js';
+
 
 const app = express();
 const port = process.env.DEFAULT_PORT; 
@@ -54,6 +57,7 @@ app.use(login);
 app.use(createAccount)
 app.use(userSession);
 app.use(logout);
+app.use(schedule);
 
 app.listen(port, () => {
     console.log(`Express server listening on port: ${port}`);
