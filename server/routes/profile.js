@@ -14,6 +14,7 @@ router.get('/profile/:username', async (req, res) => {
     if (!user) { return res.status(404).json({ error: 'User not found' }) }
 
     res.json({ 
+      id: user._id,
       username: user.username,
       schedule: user.schedule,
       friends: user.friends,
