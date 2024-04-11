@@ -5,10 +5,10 @@ import 'dotenv/config'
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 
-import login from './routes/login.js'
-import createAccount from './routes/createUser.js'
-import userSession from './routes/userSession.js'
-import logout from './routes/logout.js'
+import login from './routes/auth/login.js'
+import createAccount from './routes/auth/createUser.js'
+import userSession from './routes/auth/userSession.js'
+import logout from './routes/auth/logout.js'
 import profile from './routes/profile.js';
 
 import Profile from './schemas/profile.js';

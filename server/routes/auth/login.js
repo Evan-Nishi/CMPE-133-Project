@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config';
-import Profile from '../schemas/profile.js';
+import Profile from '../../schemas/profile.js';
 
 const secret = process.env.JWT_SECRET;
 const router = express.Router();
