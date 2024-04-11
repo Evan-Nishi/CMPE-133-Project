@@ -14,7 +14,7 @@ router.post('/login', express.json(), async (req, res) => {
         const login = await handleLogin(username, password, remember);
 
         if (login.error) 
-            return res.status(401).json({ message: login.error });
+            return res.status(401).json({ error: login.error });
         
         const maxAge = req.body.remember ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
         res.cookie('jwt', login.token, {
@@ -24,7 +24,7 @@ router.post('/login', express.json(), async (req, res) => {
             sameSite: 'None',
             maxAge: maxAge,
         })
-        res.json({ message: 'Login successful!', username });
+        res.json({ message: 'Login successful!', username});
     } catch (error) {
         console.error('Login error: ', error);
         res.status(500).json({ message: 'An error occurred while processing your request' });

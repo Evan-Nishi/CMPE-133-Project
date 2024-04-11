@@ -1,12 +1,8 @@
 // Home.js
-import React from 'react';
+import React from "react";
 
 const Home = () => {
-  return (
-    <div>
-     
-    </div>
-  );
+  return <div>This is the home page</div>;
 };
 
 export default Home;
