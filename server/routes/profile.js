@@ -5,7 +5,7 @@ import Profile from '../schemas/profile.js';
 
 const router = express.Router();
 
-router.get('/schedule/:username', async (req, res) => {
+router.get('/profile/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
@@ -16,6 +16,7 @@ router.get('/schedule/:username', async (req, res) => {
     res.json({ 
       username: user.username,
       schedule: user.schedule,
+      friends: user.friends,
     });
   } catch (err) {
     res.status(500).json({ error: 'Error', details: err.message });

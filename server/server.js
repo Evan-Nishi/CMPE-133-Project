@@ -9,7 +9,7 @@ import login from './routes/login.js'
 import createAccount from './routes/createUser.js'
 import userSession from './routes/userSession.js'
 import logout from './routes/logout.js'
-import schedule from './routes/schedule.js';
+import profile from './routes/profile.js';
 
 import Profile from './schemas/profile.js';
 
@@ -57,7 +57,7 @@ app.use(login);
 app.use(createAccount)
 app.use(userSession);
 app.use(logout);
-app.use(schedule);
+app.use(profile);
 
 app.listen(port, () => {
     console.log(`Express server listening on port: ${port}`);
