@@ -13,6 +13,7 @@ const Navbar = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const handleLogout= () => {
+    setIsDropdownVisible(false)
     logout()
   }
 
