@@ -10,9 +10,10 @@ export const authenticate = (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        res.locals.user = decoded; // Storing the decoded user data in res.locals
-
-        next(); // Move to the next middleware
+        
+        res.locals.user = decoded; 
+        req.user = decoded;
+        next(); 
     } catch (error) {
         res.json({ user: null });
     }

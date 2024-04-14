@@ -1,7 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 import 'dotenv/config';
-import Profile from '../schemas/profile.js';
+import Profile from '../../schemas/profile.js';
 import { handleLogin } from './login.js';
 
 const router = express.Router()

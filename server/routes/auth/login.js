@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config';
-import Profile from '../schemas/profile.js';
+import Profile from '../../schemas/profile.js';
 
 const secret = process.env.JWT_SECRET;
 const router = express.Router();
@@ -24,6 +24,7 @@ router.post('/login', express.json(), async (req, res) => {
             sameSite: 'None',
             maxAge: maxAge,
         })
+        console.log('Successfully logged in as:', username);
         res.json({ message: 'Login successful!', username});
     } catch (error) {
         console.error('Login error: ', error);
