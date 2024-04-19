@@ -13,6 +13,7 @@ const Calendar = () => {
         "Sunday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
         "Monday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
         "Tuesday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
+        "Wednesday":Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
         "Thursday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
         "Friday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
         "Saturday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
@@ -35,9 +36,9 @@ const Calendar = () => {
                     <th>Saturday</th>
                 </tr>
             </thead>  
-            <tbody>
-                <calBody calData={calData}/>
-            </tbody>
+
+            <CalBody calData={calData}/>
+
             <style>
                 {`
                 .calendar-table {
@@ -54,18 +55,18 @@ const Calendar = () => {
 };
 
 //TODO: add col with time markers for each hr, ie 8:00am, 9:00am...
-const calBody = ({calData}) =>{
+const CalBody = ({calData}) =>{
     let rows = [];
     for(let i = 0; i < 96; i++){ //for each row
         rows.push( //we need to fix this, it's horrendous
             <tr>
-                <calBlock rgbColor={calData["Sunday"][i]}/>
-                <calBlock rgbColor={calData["Monday"][i]}/>
-                <calBlock rgbColor={calData["Tuesday"][i]}/>
-                <calBlock rgbColor={calData["Wednesday"][i]}/>
-                <calBlock rgbColor={calData["Thursday"][i]}/>
-                <calBlock rgbColor={calData["Friday"][i]}/>
-                <calBlock rgbColor={calData["Saturday"][i]}/>
+                <CalBlock rgbColor={calData["Sunday"][i]}/>
+                <CalBlock rgbColor={calData["Monday"][i]}/>
+                <CalBlock rgbColor={calData["Tuesday"][i]}/>
+                <CalBlock rgbColor={calData["Wednesday"][i]}/>
+                <CalBlock rgbColor={calData["Thursday"][i]}/>
+                <CalBlock rgbColor={calData["Friday"][i]}/>
+                <CalBlock rgbColor={calData["Saturday"][i]}/>
             </tr>
         );
     }
@@ -76,7 +77,7 @@ const calBody = ({calData}) =>{
     )
 };
 
-const calBlock = ({rgbColor}) => {
+const CalBlock = ({rgbColor}) => {
     const tileBackground = (events) => {
         let gbVal = 255 - (55 * events);
         if(gbVal < 0){ 
@@ -89,6 +90,8 @@ const calBlock = ({rgbColor}) => {
     
     const blockStyle = {
         border: '1px solid black',
+        width:'60px',
+        height:'45px',
         backgroundColor: tileBackground(rgbColor)
     };
     return(
