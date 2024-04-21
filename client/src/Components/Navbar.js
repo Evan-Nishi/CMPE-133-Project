@@ -24,21 +24,31 @@ const Navbar = () => {
   return (
     <nav className="bg-blue-300 flex flex-row justify-between items-center md:py-4 w-full">
       <Link to="/">
-        <div className="text-left font-bold text-4xl">Fren2Meet</div>  {/* Left-aligned */}
+        <div className="text-left font-bold text-4xl">Fren2Meet</div>  
       </Link>
       {user && (
-        <div className="flex flex-row items-center justify-between w-full">  
-          <form className="w-full flex justify-center md:ml-12">  
-            <input
-              type="text"
-              id="friendSearch"
-              name="friendSearc"
-              placeholder= "Search"
-              className="rounded-lg px-4 py-1 border md:w-full"
-      
-            />
-          </form>
-
+        <div className="flex flex-row items-center justify-end w-full">   {/*change justify when add search bar*/}
+          {/* <div className="relative md:ml-12 md:w-3/4">
+            <form className=" flex justify-center ">  
+              <input
+                type="text"
+                id="friendSearch"
+                name="friendSearch"
+                placeholder= "Search"
+                className="rounded-lg px-4 py-1 border md:w-full"
+              />
+            </form>
+            <div className="absolute md:w-full mt-2 bg-white rounded-md shadow-lg">
+                <ul className="py-1">
+                  <li >
+                    ryan
+                  </li>
+                  <li>
+                    Johnny
+                  </li>
+                </ul>
+            </div>
+          </div> */}
           <div className="relative w-1/3 flex justify-end md:mr-12">  
             <div onClick={() => setIsDropdownVisible((prevState) => !prevState)}>
               <FaUser />

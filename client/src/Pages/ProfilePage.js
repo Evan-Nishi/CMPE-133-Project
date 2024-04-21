@@ -14,8 +14,7 @@ const UserProfile = () => {
     const fetchUserProfile = async () => {
       try {
         const response = await fetch(`/profile/${username}`);
-        if (!response.ok) {
-          console.log(response);  
+        if (!response.ok) {  
           throw new Error('Failed to fetch user data');
         }
         const data = await response.json();
