@@ -1,7 +1,15 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
-const Calendar = () => {
 
+
+const tdStyle = {
+    border: '1px solid black',
+    width: '10%',
+    height: '40px' // Adjust the height value as needed
+};
+
+
+const Calendar = () => {
     //this gets tile background color, more red = more events scheduled during time
 
 
@@ -17,16 +25,12 @@ const Calendar = () => {
         "Thursday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
         "Friday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
         "Saturday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-        "Sunday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
     };
-
-    //map like so
-    //calData[Sunday][0]
-    
     return(
         <table className="calendar-table">
             <thead>
                 <tr>
+                    <th><b>Time</b></th>
                     <th>Sunday</th>
                     <th>Monday</th>
                     <th>Tuesday</th>
@@ -58,15 +62,17 @@ const Calendar = () => {
 const CalBody = ({calData}) =>{
     let rows = [];
     for(let i = 0; i < 96; i++){ //for each row
+        let isHrRow = (i % 4) == 0; //every block 15min, if it's 4th block then it's a row that is the start of an hour
         rows.push( //we need to fix this, it's horrendous
-            <tr>
-                <CalBlock rgbColor={calData["Sunday"][i]}/>
-                <CalBlock rgbColor={calData["Monday"][i]}/>
-                <CalBlock rgbColor={calData["Tuesday"][i]}/>
-                <CalBlock rgbColor={calData["Wednesday"][i]}/>
-                <CalBlock rgbColor={calData["Thursday"][i]}/>
-                <CalBlock rgbColor={calData["Friday"][i]}/>
-                <CalBlock rgbColor={calData["Saturday"][i]}/>
+            <tr key={i} style={{ borderTop: `${isHrRow ? 5 : 1}px solid black` }}>
+                <CalTime timeBlocks={i}/>
+                <CalBlock  numEvents={calData["Sunday"][i]}/>
+                <CalBlock  numEvents={calData["Monday"][i]} />
+                <CalBlock  numEvents={calData["Tuesday"][i]} />
+                <CalBlock  numEvents={calData["Wednesday"][i]} />
+                <CalBlock  numEvents={calData["Thursday"][i]} />
+                <CalBlock  numEvents={calData["Friday"][i]} />
+                <CalBlock  numEvents={calData["Saturday"][i]} />
             </tr>
         );
     }
@@ -77,8 +83,46 @@ const CalBody = ({calData}) =>{
     )
 };
 
-const CalBlock = ({rgbColor}) => {
+const CalTime =(props) => {//96 blocks of 15 min each
+    const nonHrStyle = {
+        ...tdStyle,
+        backgroundColor: 'white',
+    }
+
+    if(props.timeBlocks % 4 == 0){ //it is hour row, get hour
+        let hr = Math.floor(props.timeBlocks / 4);
+        let timeStampStr = "";
+
+        //this is horrendous
+        if (hr == 0){
+            timeStampStr = "12AM";
+        } else if (hr == 12){
+            timeStampStr = "12PM";
+        } else {
+            if(hr > 12){
+                timeStampStr = `${hr - 12}PM`;
+            } else {
+                timeStampStr = `${hr}AM`;
+            }
+        }
+        return(
+            <td style={tdStyle}>
+                <b>{timeStampStr}</b>
+            </td>
+        )
+    } else {
+        return(<td style={nonHrStyle}/>); //if it's not an hour block, no need to show formatting
+    }
+};
+
+
+
+const CalBlock = (props) => {
     const tileBackground = (events) => {
+        if(events == -1){ //this is a permanent recurring block
+            return("rgb(128, 128, 128)");
+        } 
+
         let gbVal = 255 - (55 * events);
         if(gbVal < 0){ 
             gbVal = 0;
@@ -89,10 +133,8 @@ const CalBlock = ({rgbColor}) => {
     }
     
     const blockStyle = {
-        border: '1px solid black',
-        width:'60px',
-        height:'45px',
-        backgroundColor: tileBackground(rgbColor)
+        ...tdStyle,
+        backgroundColor: tileBackground(props.numEvents)
     };
     return(
         <td style={blockStyle} />
@@ -103,3 +145,4 @@ Calendar.propTypes = {
     profileID: PropTypes.string
 };
 export default Calendar;
+
