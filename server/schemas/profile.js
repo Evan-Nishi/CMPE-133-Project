@@ -42,8 +42,16 @@ const profileSchema = new Schema({
         }),
     },
     friends: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Profile',
+        friend: {
+            type: Schema.Types.ObjectId,
+            ref: 'Profile',
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'accepted'],
+            required: true,
+        }
     }],
 })
 
