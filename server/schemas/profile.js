@@ -61,7 +61,7 @@ const profileSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['pending', 'accepted', 'invited'],
+            enum: ['pending', 'accepted'],
             required: true,
         }
     }],

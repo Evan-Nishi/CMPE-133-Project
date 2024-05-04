@@ -36,7 +36,7 @@ router.post('/event', authenticate, async (req, res) => {
               $push: {
                   events: {
                       eventId: savedEvent._id,
-                      status: 'invited' 
+                      status: 'pending' 
                   }
               }
           });
@@ -45,7 +45,7 @@ router.post('/event', authenticate, async (req, res) => {
       await Profile.findByIdAndUpdate(id, {
         $push: {
           events: {
-            event: savedEvent._id,
+            eventId: savedEvent._id,
             status: 'accepted'
           }
         }
@@ -84,7 +84,7 @@ router.put('/event/respond', authenticate, async (req, res) => {
       if (!user) {
           return res.status(404).send('User not found');
       }
-      const userEventIndex = user.events.findIndex(e => e.eventId.equals(eventId) && e.status === 'invited');
+      const userEventIndex = user.events.findIndex(e => e.eventId.equals(eventId) && e.status === 'pending');
       if (userEventIndex === -1) {
           return res.status(400).send('No pending invitation found in user profile');
       }
@@ -103,6 +103,77 @@ router.put('/event/respond', authenticate, async (req, res) => {
       res.send(`Event invitation ${status}`);
   } catch (error) {
       console.error(`Error responding to event invitation:`, error);
+      res.status(500).send('Internal server error');
+  }
+});
+
+router.put('/event/:eventId', authenticate, async (req, res) => {
+  const { id } = req.user;  // Creator's ID from the authenticated user
+  const { title, description, participants, date, start, end } = req.body; // Data from the request body
+  const { eventId } = req.params; // Event ID from the URL
+
+  try {
+      // Fetch the existing event
+      const event = await Event.findById(eventId);
+      if (!event) {
+          return res.status(404).send('Event not found');
+      }
+      if (event.creator.creatorId.toString() !== id) {
+          return res.status(403).send('Not authorized to edit this event');
+      }
+
+      // Update the event details
+      event.title = title || event.title;
+      event.description = description || event.description;
+      event.date = date || event.date;
+      event.start = start || event.start;
+      event.end = end || event.end;
+
+      // Determine the new and removed participants
+      const currentParticipantIds = event.participants.map(p => p.participant_id.toString());
+      const newParticipants = participants.filter(p => !currentParticipantIds.includes(p));
+      const existingParticipants = event.participants.filter(p => participants.includes(p.participant_id.toString()));
+
+      // Update participants in the event
+      event.participants = [
+          ...existingParticipants,
+          ...newParticipants.map(participant => ({
+              participant_id: participant,
+              status: 'pending'
+          }))
+      ];
+
+      // Save the updated event
+      await event.save();
+
+      // Add the event to new participants' profiles
+      await Promise.all(newParticipants.map(participant => {
+          return Profile.findByIdAndUpdate(participant, {
+              $push: {
+                  events: {
+                      eventId,
+                      status: 'pending'
+                  }
+              }
+          });
+      }));
+
+      // Remove the event from profiles of participants who are no longer part of the event
+      const removedParticipants = currentParticipantIds.filter(p => !participants.includes(p));
+      await Promise.all(removedParticipants.map(participant => {
+          return Profile.findByIdAndUpdate(participant, {
+              $pull: {
+                  events: { event: eventId }
+              }
+          });
+      }));
+
+      res.status(200).json({
+          message: 'Event updated successfully.',
+          event: event
+      });
+  } catch (error) {
+      console.error('Error updating event:', error);
       res.status(500).send('Internal server error');
   }
 });
