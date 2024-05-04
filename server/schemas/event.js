@@ -10,9 +10,16 @@ const eventSchema = new Schema({
         type: String,
     },
     participants: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Profile',
-        required: true,
+        participant_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Profile',
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'accepted'],
+            required: true,
+        }
     }],
     date: {
         type: Date,
