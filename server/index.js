@@ -12,6 +12,7 @@ import logout from './routes/auth/logout.js'
 import profile from './routes/profile.js';
 import friends from './routes/friends.js';
 import schedule from './routes/schedule.js';
+import event from './routes/createEvent.js';
 
 import Profile from './schemas/profile.js';
 
@@ -41,7 +42,7 @@ app.get('/', (req, res) => {
 })
 app.get('/users', async (req, res) => {
   try {
-    const profiles = await Profile.find({});
+    const profiles = await Profile.find({}).select('username _id events');
     res.json(profiles);
   } catch (err) {
     res.status(500).send(err);
@@ -62,6 +63,7 @@ app.use(logout);
 app.use(profile);
 app.use(friends);
 app.use(schedule);
+app.use(event);
 
 app.listen(port, () => {
     console.log(`Express server listening on port: ${port}`);

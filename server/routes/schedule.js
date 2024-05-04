@@ -15,12 +15,12 @@ function validateSchedule(req, res, next) {
 
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const isValid = days.every(day => 
-      schedule[day] && schedule[day].slots && schedule[day].slots.length === 96 &&
-      schedule[day].slots.every(slot => slot === 0 || slot === 1)
+      schedule[day] && Array.isArray(schedule[day].slots) &&
+      schedule[day].slots.every(slot => typeof slot === 'number' && slot >= 0 && slot < 96)
   );
 
   if (!isValid) {
-      return res.status(400).json({ error: 'Invalid schedule format.' });
+      return res.status(400).json({ error: 'Invalid schedule format. Ensure all slots are integers within the range 0-95.' });
   }
 
   next();
@@ -32,11 +32,19 @@ router.post('/schedule', authenticate, validateSchedule, async (req, res) => {
     const { id } = req.user;
     const { schedule } = req.body;
 
+    // Build the update object dynamically based on provided slots
+    let updateOps = {};
+    for (const day of Object.keys(schedule)) {
+      schedule[day].slots.forEach(slotIndex => {
+        updateOps[`schedule.${day}.slots.${slotIndex}`] = 1; // Increment slot by 1
+      });
+    }
+
     const updatedProfile = await Profile.findByIdAndUpdate(
         id,
-        { $set: { 'schedule': schedule } },
+        { $inc: updateOps }, // Use the $inc operator with the built updateOps
         { new: true }
-    )
+    );
 
     if (!updatedProfile) {
         return res.status(404).json({ error: 'User not found' });
