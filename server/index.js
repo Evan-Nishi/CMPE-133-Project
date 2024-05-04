@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
 })
 app.get('/users', async (req, res) => {
   try {
-    const profiles = await Profile.find({});
+    const profiles = await Profile.find({}).select('username _id');
     res.json(profiles);
   } catch (err) {
     res.status(500).send(err);
