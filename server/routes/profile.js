@@ -30,7 +30,6 @@ router.get('/profile/:username', authenticate, async (req, res) => {
       res.json({ 
         id: user._id,
         username: user.username,
-        schedule: user.schedule,
         friends: user.friends
       });
     }
