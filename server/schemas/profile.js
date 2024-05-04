@@ -53,6 +53,18 @@ const profileSchema = new Schema({
             required: true,
         }
     }],
+    events: [{
+        eventId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Event',
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'accepted', 'invited'],
+            required: true,
+        }
+    }],
 })
 
 const Profile = mongoose.model('Profile', profileSchema);
