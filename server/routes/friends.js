@@ -24,10 +24,12 @@ router.post('/friends', authenticate, async (req, res) => {
         // Add a pending request to both user's and friend's friend lists
         user.friends.push({
             friend: friendId,
+            name: friend.username,
             status: 'invited',
         });
         friend.friends.push({
             friend: userId,
+            name: user.username,
             status: 'pending',
         });
         await user.save();
