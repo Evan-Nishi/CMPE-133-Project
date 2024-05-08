@@ -78,10 +78,16 @@ const Navbar = () => {
             </div>
           </div> */}
           <div className="relative w-1/3 flex justify-end md:mr-12">  
-            <div onClick={() => setIsDropdownVisible((prevState) => !prevState)}  className="mr-4 cursor-pointer">
+            <div onClick={() => {
+              setInvitationVisible(false); // Close invitation
+              setIsDropdownVisible((prevState) => !prevState); // Toggle dropdown visibility
+            }} className="mr-4 cursor-pointer">
               <FaUser/>
-            </div>
-            <div onClick={() => setInvitationVisible((prevState) => !prevState)} className="cursor-pointer">
+             </div>
+            <div onClick={() => {
+              setIsDropdownVisible(false); // Close dropdown
+              setInvitationVisible((prevState) => !prevState); // Toggle invitation visibility
+            }} className="cursor-pointer">
               <RiMailSendFill />
             </div>
             {isDropdownVisible && (
@@ -89,7 +95,7 @@ const Navbar = () => {
                 <ul className="py-1">
                   <Link to={`/profile/${user.username}`} onClick={() => setIsDropdownVisible(false)}>
                     <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-                      Profile: {user.username}
+                      {user.username}
                     </li>
                   </Link>
                   <li>
@@ -105,29 +111,29 @@ const Navbar = () => {
               </div>
             )}
             {invitationVisible && userData && userData.friends && (
-  <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
-    <ul className="py-1">
-      {userData.friends.filter(friend => friend.status === 'pending').length > 0 && (
+              <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                <ul className="py-1">
+                {userData.friends.filter(friend => friend.status === 'pending').length > 0 && (
         <li className="block px-4 py-2 text-sm text-black text-center ">
           Your Friend Requests
         </li>
       )}
-      {userData.friends.filter(friend => friend.status === 'pending').length === 0 ? (
-        <li className="block px-4 py-2 text-sm text-black text-center font-bold">
-          No friend requests
-        </li>
-      ) : (
-        userData.friends.filter(friend => friend.status === 'pending').map((friend, index) => (
-          <a href={`/profile/${friend.name}`} onClick={() => setInvitationVisible(false)} key={index}>
-            <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-              {friend.name} {/* Display friend ID for now as no name is available */}
-            </li>
-          </a>
-        ))
+                  {userData.friends.filter(friend => friend.status === 'pending').length === 0 ? (
+                    <li className="block px-4 py-2 text-sm text-black text-center font-bold">
+                      No friends request
+                    </li>
+                  ) : (
+                    userData.friends.filter(friend => friend.status === 'pending').map((friend, index) => (
+                      <a href={`/profile/${friend.name}`} onClick={() => setInvitationVisible(false)} key={index}>
+                        <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+                          {friend.name} {/* Display friend ID for now as no name is available */}
+                        </li>
+                      </a>
+                    ))
+                  )}
+                </ul>
+              </div>
       )}
-    </ul>
-  </div>
-)}
           </div>
         </div>
       )}
