@@ -47,6 +47,10 @@ const profileSchema = new Schema({
             ref: 'Profile',
             required: true,
         },
+        name: {
+            type: String,
+            required: true
+        },
         status: {
             type: String,
             enum: ['pending', 'accepted', 'invited'],

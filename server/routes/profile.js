@@ -39,5 +39,37 @@ router.get('/profile/:username', authenticate, async (req, res) => {
 
 });
 
+router.post('/profile', authenticate, async (req, res) => {
+  try {
+    const _id = req.body.id;
+
+    const user = await Profile.findOne({ _id }).exec();
+    
+    if (!user) { return res.status(404).json({ error: 'User not found' }) }
+
+    const events = await Event.find({
+      'participants.participant_id': user._id,
+    }).exec();
+    if (req.user.id === user._id.toString()) {
+      res.json({ 
+        id: user._id,
+        username: user.username,
+        schedule: user.schedule,
+        friends: user.friends,
+        events: user.events
+      });
+    } else {
+      res.json({ 
+        id: user._id,
+        username: user.username,
+        friends: user.friends
+      });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Error', details: err.message });
+  }
+
+});
+
 
 export default router;
