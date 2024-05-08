@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate} from 'react-router-dom';
 import { useAuthContext} from '../hook/useAuthContext';
 import { FaUserCircle } from "react-icons/fa";
 
@@ -12,6 +12,7 @@ const UserProfile = () => {
   const {user} = useAuthContext();
   const navigate = useNavigate();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
 
   const fetchUserProfile = async () => {
     try {
@@ -109,21 +110,22 @@ const UserProfile = () => {
     }
 };
 
-  
 
-  useEffect(() => {
-    if (userData && user) {
-      const friendInfo = userData.friends?.find(f => f.friend === user.id);
-      if (friendInfo) {
-        setFriendState(friendInfo.status);
-        setIsFriendOrPending(true);
-      } else {
-        setFriendState(null);
-        setIsFriendOrPending(false);
-      }
+const updateFriendState = () => {
+  if (userData && user) {
+    const friendInfo = userData.friends?.find(f => f.friend === user.id);
+    if (friendInfo) {
+      setFriendState(friendInfo.status);
+      setIsFriendOrPending(true);
+    } else {
+      setFriendState(null);
+      setIsFriendOrPending(false);
     }
-    console.log('friend state', friendState);
-  }, [userData, user]);
+  }
+};
+useEffect(() => {
+  updateFriendState();
+}, [userData, user]);
 
   useEffect(() => {
     fetchUserProfile();
@@ -159,8 +161,8 @@ const UserProfile = () => {
                 <div className="justify-center p-2 mt-9 text-base bg-gray-200">Friend Request Sent</div>
               ) : friendState === 'invited' ? (
                 <div className="relative">  {/* This wrapper div to control position */}
-                  <div className="cursor-pointer justify-center p-2 mt-9 text-base bg-gray-200" onClick={() => setIsDropdownVisible(prevState => !prevState)}>
-                    Invitation Received
+                  <div className="cursor-pointer justify-center p-2 mt-9 text-base bg-gray-200 md:w-48" onClick={() => setIsDropdownVisible(prevState => !prevState)}>
+                    Invitation Received ↓
                   </div>
                   {isDropdownVisible && (
                     <div className="absolute w-full mt-2 bg-white border border-gray-200 rounded shadow-lg z-10">

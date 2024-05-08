@@ -45,10 +45,10 @@ const Navbar = () => {
 
   const handleLogout= () => {
     setIsDropdownVisible(false)
+    setInvitationVisible(false)
     logout()
   }
 
-  console.log('current user:', userData);
   return (
     <nav className="bg-blue-300 flex flex-row justify-between items-center md:py-4 w-full">
       <Link to="/">
@@ -89,7 +89,7 @@ const Navbar = () => {
                 <ul className="py-1">
                   <Link to={`/profile/${user.username}`} onClick={() => setIsDropdownVisible(false)}>
                     <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-                      {user.username}
+                      Profile: {user.username}
                     </li>
                   </Link>
                   <li>
@@ -105,16 +105,29 @@ const Navbar = () => {
               </div>
             )}
             {invitationVisible && userData && userData.friends && (
-              <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
-                <ul className="py-1">
-                  {userData.friends.filter(f => f.status === 'invited').map((friend, index) => (
-                    <li key={index} className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-                      {friend.friend} {/* Display friend ID for now as no name is available */}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+  <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+    <ul className="py-1">
+      {userData.friends.filter(friend => friend.status === 'pending').length > 0 && (
+        <li className="block px-4 py-2 text-sm text-black text-center ">
+          Your Friend Requests
+        </li>
+      )}
+      {userData.friends.filter(friend => friend.status === 'pending').length === 0 ? (
+        <li className="block px-4 py-2 text-sm text-black text-center font-bold">
+          No friend requests
+        </li>
+      ) : (
+        userData.friends.filter(friend => friend.status === 'pending').map((friend, index) => (
+          <a href={`/profile/${friend.name}`} onClick={() => setInvitationVisible(false)} key={index}>
+            <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+              {friend.name} {/* Display friend ID for now as no name is available */}
+            </li>
+          </a>
+        ))
+      )}
+    </ul>
+  </div>
+)}
           </div>
         </div>
       )}
