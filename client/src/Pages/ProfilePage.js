@@ -73,7 +73,6 @@ const UserProfile = () => {
         console.log("Invalid operation. No user or userData available."); 
         return;
     }
-
     const friendId = userData.id; 
 
     try {
@@ -104,6 +103,7 @@ const UserProfile = () => {
         }
 
         await fetchUserProfile();
+        window.location.reload(); //remove if nessesary
     } catch (error) {
         console.error('Error processing invitation response:', error);
         console.log('Error processing your response. Please try again.');
@@ -127,9 +127,9 @@ useEffect(() => {
   updateFriendState();
 }, [userData, user]);
 
-  useEffect(() => {
-    fetchUserProfile();
-  }, [username]);
+useEffect(() => {
+  fetchUserProfile();
+}, [username]);
 
   if(!user) {
     navigate('/login')
@@ -166,13 +166,13 @@ useEffect(() => {
                   </div>
                   {isDropdownVisible && (
                     <div className="absolute w-full mt-2 bg-white border border-gray-200 rounded shadow-lg z-10">
-                      <button onClick={() => handleInvitationResponse('accepted')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Accept</button>
-                      <button onClick={() => handleInvitationResponse('rejected')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Reject</button>
+                      <button onClick={() => handleInvitationResponse('accepted')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Accept ✅</button>
+                      <button onClick={() => handleInvitationResponse('rejected')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Reject ❌</button>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="justify-center p-2 mt-9 text-base bg-gray-200">Friends</div>
+                <div className="justify-center p-2 mt-9 text-base bg-gray-200">Friends 🤝</div>
               )
             )}
               
