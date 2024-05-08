@@ -5,7 +5,10 @@ import Button from "./Button";
 import { useLogout } from "../hook/useLogout";
 import { useAuthContext } from "../hook/useAuthContext";
 import { FaUser } from "react-icons/fa6";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { RiMailSendFill } from "react-icons/ri";
+
+
 
 
 
@@ -13,13 +16,38 @@ const Navbar = () => {
   const {logout} = useLogout();
   const{user} = useAuthContext();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [invitationVisible, setInvitationVisible] = useState(false);
+  const [userData, setUserData] = useState(null); // State to store user data
+
+  useEffect(() => {
+    if (user) {
+      fetchUserData(user.username); // Fetch user data if logged in
+    }
+  }, [user?.username]);
+
+  const fetchUserData = async (username) => {
+    try {
+      const response = await fetch(`/profile/${username}`, {
+        method: 'GET',
+        credentials: 'include', // Ensure cookies are sent with the request
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const data = await response.json();
+      setUserData(data); // Set fetched data into state
+    } catch (err) {
+      console.error('Error fetching user data:', err.message);
+      // Optionally handle the error (e.g., show a notification)
+    }
+  };
 
 
   const handleLogout= () => {
     setIsDropdownVisible(false)
+    setInvitationVisible(false)
     logout()
   }
-
 
   return (
     <nav className="bg-blue-300 flex flex-row justify-between items-center md:py-4 w-full">
@@ -50,8 +78,17 @@ const Navbar = () => {
             </div>
           </div> */}
           <div className="relative w-1/3 flex justify-end md:mr-12">  
-            <div onClick={() => setIsDropdownVisible((prevState) => !prevState)}>
-              <FaUser />
+            <div onClick={() => {
+              setInvitationVisible(false); // Close invitation
+              setIsDropdownVisible((prevState) => !prevState); // Toggle dropdown visibility
+            }} className="mr-4 cursor-pointer">
+              <FaUser/>
+             </div>
+            <div onClick={() => {
+              setIsDropdownVisible(false); // Close dropdown
+              setInvitationVisible((prevState) => !prevState); // Toggle invitation visibility
+            }} className="cursor-pointer">
+              <RiMailSendFill />
             </div>
             {isDropdownVisible && (
               <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
@@ -73,6 +110,30 @@ const Navbar = () => {
                 </ul>
               </div>
             )}
+            {invitationVisible && userData && userData.friends && (
+              <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                <ul className="py-1">
+                {userData.friends.filter(friend => friend.status === 'pending').length > 0 && (
+        <li className="block px-4 py-2 text-sm text-black text-center ">
+          Your Friend Requests
+        </li>
+      )}
+                  {userData.friends.filter(friend => friend.status === 'pending').length === 0 ? (
+                    <li className="block px-4 py-2 text-sm text-black text-center font-bold">
+                      No friends request
+                    </li>
+                  ) : (
+                    userData.friends.filter(friend => friend.status === 'pending').map((friend, index) => (
+                      <a href={`/profile/${friend.name}`} onClick={() => setInvitationVisible(false)} key={index}>
+                        <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+                          {friend.name} {/* Display friend ID for now as no name is available */}
+                        </li>
+                      </a>
+                    ))
+                  )}
+                </ul>
+              </div>
+      )}
           </div>
         </div>
       )}
