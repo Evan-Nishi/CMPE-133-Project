@@ -53,12 +53,6 @@ const UserProfile = () => {
         result = await response.json();
       } 
 
-      // if (typeof result === 'string') {
-      //   alert(result); // Handle plain text responses
-      // } else {
-      //   alert(`Friend request sent: ${result.message}`); // Handle JSON responses
-      // }
-
       setUserData({
         ...userData,
         friends: [...userData.friends, { friend: friendId, status: 'pending' }]
@@ -115,8 +109,6 @@ const UserProfile = () => {
     }
 };
 
-
-
   
 
   useEffect(() => {
@@ -149,13 +141,6 @@ const UserProfile = () => {
     return <div>Loading...</div>;
   }
 
-
-  
-  
-// console.log('isFriendOrPending:', isFriendOrPending);
-// const firstFriend = userData.friends?.length > 0 ? userData.friends[0] : 'No friends';
-// console.log('first friend of nguyenphuc:', firstFriend);
-// console.log('phucnguyenid:', user.id); 
 
   return (
     <div>
