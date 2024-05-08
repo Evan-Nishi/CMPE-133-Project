@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate} from 'react-router-dom';
+import { useParams} from 'react-router-dom';
 import { useAuthContext} from '../hook/useAuthContext';
 import { FaUserCircle } from "react-icons/fa";
 
@@ -10,7 +10,6 @@ const UserProfile = () => {
   const [isFriendOrPending, setIsFriendOrPending] = useState(false);
   const { username } = useParams();
   const {user} = useAuthContext();
-  const navigate = useNavigate();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
 
@@ -103,7 +102,6 @@ const UserProfile = () => {
         }
 
         await fetchUserProfile();
-        window.location.reload(); //remove if nessesary
     } catch (error) {
         console.error('Error processing invitation response:', error);
         console.log('Error processing your response. Please try again.');
@@ -131,9 +129,8 @@ useEffect(() => {
   fetchUserProfile();
 }, [username]);
 
-  if(!user) {
-    navigate('/login')
-  }
+
+console.log('user: ', user)
 
   if (error) {
     return <div>Error: {error}</div>;
