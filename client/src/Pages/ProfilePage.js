@@ -11,6 +11,7 @@ const UserProfile = () => {
   const { username } = useParams();
   const {user} = useAuthContext();
   const navigate = useNavigate();
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const fetchUserProfile = async () => {
     try {
@@ -50,9 +51,7 @@ const UserProfile = () => {
       let result;
       if (contentType && contentType.includes('application/json')) {
         result = await response.json();
-      } else {
-        result = await response.text();
-      }
+      } 
 
       // if (typeof result === 'string') {
       //   alert(result); // Handle plain text responses
@@ -71,7 +70,54 @@ const UserProfile = () => {
       console.error('Failed to add friend:', error);
       alert(error.messxage); // Show the error message
     }
-}
+  }
+
+  
+  const handleInvitationResponse = async (response) => {
+    if (!userData || !user) {
+        console.log("Invalid operation. No user or userData available."); 
+        return;
+    }
+
+    const friendId = userData.id; 
+
+    try {
+        const result = await fetch('/friends', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                friendId: friendId,
+                status: response
+            })
+        });
+
+        const contentType = result.headers.get('Content-Type');
+        if (!result.ok) {
+            const errorText = await (contentType.includes('application/json') ? result.json() : result.text());
+            throw new Error(`Failed to process the invitation response: ${errorText}`);
+        }
+
+        if (contentType.includes('application/json')) {
+            const data = await result.json();
+            console.log(data.message || `Friend request ${response}ed.`);
+        } else {
+            const textData = await result.text();
+            console.log("Received non-JSON response:", textData);
+        }
+
+        await fetchUserProfile();
+    } catch (error) {
+        console.error('Error processing invitation response:', error);
+        console.log('Error processing your response. Please try again.');
+    }
+};
+
+
+
+  
 
   useEffect(() => {
     if (userData && user) {
@@ -127,7 +173,17 @@ const UserProfile = () => {
               ) : friendState === 'pending' ? (
                 <div className="justify-center p-2 mt-9 text-base bg-gray-200">Friend Request Sent</div>
               ) : friendState === 'invited' ? (
-                <div className="justify-center p-2 mt-9 text-base bg-gray-200">Invitation Received</div>
+                <div className="relative">  {/* This wrapper div to control position */}
+                  <div className="cursor-pointer justify-center p-2 mt-9 text-base bg-gray-200" onClick={() => setIsDropdownVisible(prevState => !prevState)}>
+                    Invitation Received
+                  </div>
+                  {isDropdownVisible && (
+                    <div className="absolute w-full mt-2 bg-white border border-gray-200 rounded shadow-lg z-10">
+                      <button onClick={() => handleInvitationResponse('accepted')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Accept</button>
+                      <button onClick={() => handleInvitationResponse('rejected')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Reject</button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="justify-center p-2 mt-9 text-base bg-gray-200">Friends</div>
               )
