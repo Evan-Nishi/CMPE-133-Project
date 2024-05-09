@@ -57,4 +57,33 @@ router.post('/schedule', authenticate, validateSchedule, async (req, res) => {
   }
 });
 
+router.put('/schedule/clear', authenticate, async (req, res) => {
+  try {
+      const { id } = req.user;
+
+      const resetOps = {};
+      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      days.forEach(day => {
+          for (let i = 0; i < 96; i++) { 
+              resetOps[`schedule.${day}.slots.${i}`] = 0;
+          }
+      });
+
+      const updatedProfile = await Profile.findByIdAndUpdate(
+          id,
+          { $set: resetOps }, 
+          { new: true }
+      );
+
+      if (!updatedProfile) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json({ message: 'Schedule cleared successfully', schedule: updatedProfile.schedule });
+  } catch (error) {
+      console.error('Error clearing schedule: ', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
