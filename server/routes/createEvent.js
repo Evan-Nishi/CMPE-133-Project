@@ -90,8 +90,17 @@ router.put('/event/respond', authenticate, async (req, res) => {
       }
 
       if (status === 'accepted') {
-          event.participants[participantIndex].status = 'accepted';
-          user.events[userEventIndex].status = 'accepted';
+        event.participants[participantIndex].status = 'accepted';
+        user.events[userEventIndex].status = 'accepted';
+
+        const eventDay = event.date.toISOString().split('T')[0]; 
+        const dayOfWeek = new Date(eventDay).getDay();
+        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+        // Update schedule slots
+        for (let slot = event.start; slot <= event.end; slot++) {
+            user.schedule[dayNames[dayOfWeek]].slots[slot]++;
+        }
       } else if (status === 'rejected') {
           event.participants.splice(participantIndex, 1);
           user.events.splice(userEventIndex, 1);
