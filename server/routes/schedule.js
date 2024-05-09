@@ -86,4 +86,32 @@ router.put('/schedule/clear', authenticate, async (req, res) => {
   }
 });
 
+router.put('/schedule/clearAll', authenticate, async (req, res) => {
+  if (!req.user.isAdmin) {
+      return res.status(403).json({ error: 'Unauthorized to perform this action' });
+  }
+
+  try {
+      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const resetOps = {};
+      days.forEach(day => {
+          resetOps[`schedule.${day}.slots`] = Array(96).fill(0);  
+      });
+
+      const result = await Profile.updateMany(
+          {}, 
+          { $set: resetOps }
+      );
+
+      if (result.nModified === 0) {
+          return res.status(404).json({ error: 'No profiles found or no changes made' });
+      }
+
+      res.json({ message: `Schedules wiped successfully for ${result.nModified} users` });
+  } catch (error) {
+      console.error('Error wiping all schedules: ', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
