@@ -29,12 +29,11 @@ const UserProfile = () => {
       console.log("User data: ", data);
       if (data.events && data.events.length > 0) {
         const eventIds = data.events.map(event => event.eventId);
+        console.log("Event IDs: ", eventIds); 
         fetchEvents(eventIds);
         console.log("Event data: ", eventsData);  
       }
 
-    
-    
       
     } catch (error) {
       setError(error.message);
