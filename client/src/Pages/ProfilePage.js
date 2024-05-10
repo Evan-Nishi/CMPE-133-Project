@@ -5,7 +5,6 @@ import { FaUserCircle, FaPaperclip } from "react-icons/fa";
 import useFriend from "../hook/friends/useFriend";
 import Calendar from "../Components/Calendar";
 import useGetEvent from "../hook/useGetEvent";
-import CreateEvent from "../Components/CreateEvent";
 
 
 const UserProfile = () => {
@@ -167,14 +166,8 @@ const UserProfile = () => {
                 ))}
             </div>
           </div>
-          <div className="flex w-full">
-            <div className="flex-1">
-              <Calendar schedule={userData.schedule} events={eventsData} />
-            </div>
-            <div className="flex-1" style={{ maxHeight: "600px" }}>
-              <CreateEvent />
-            </div>
-          </div>
+          <Calendar schedule={userData.schedule} events={eventsData} />
+
         </div>
       )}
     </div>

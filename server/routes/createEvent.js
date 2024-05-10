@@ -1,49 +1,42 @@
-// create event object, and add the event to the user's profile
-import express from 'express';
-import 'dotenv/config';
-import Profile from '../schemas/profile.js';
-import Event from '../schemas/event.js';
-import { authenticate } from '../middleware/authenticate.js';
+    // create event object, and add the event to the user's profile
+    import express from 'express';
+    import 'dotenv/config';
+    import Profile from '../schemas/profile.js';
+    import Event from '../schemas/event.js';
+    import { authenticate } from '../middleware/authenticate.js';
 
-const router = express.Router();
+    const router = express.Router();
 
-router.post('/event', authenticate, async (req, res) => {
+    router.post('/event', authenticate, async (req, res) => {
     const { id, username } = req.user;
     const { title, description, participants, date, start, end } = req.body;
 
     try {
-        const participantIds = await Promise.all(participants.map(async ({ username }) => {
-            const profile = await Profile.findOne({ username }).exec();
-            if (!profile) {
-                throw new Error(`No profile found for username: ${username}`);
-            }
-            return {
-                participant_id: profile._id,
-                status: 'pending'
-            };
-        }));
-
         const newEvent = new Event({
             title,
             description,
-            participants: participantIds,
+            participants: participants.map(participant => ({
+                participant_id: participant,
+                status: 'pending' 
+            })),
             date,
             start,
             end,
             creator: {
-                creatorId: id,
-                creatorName: username
+                creatorId: id, 
+                creatorName: username 
             },
         });
 
         const savedEvent = await newEvent.save();
 
-        await Promise.all(participantIds.map(async ({ participant_id }) => {
-            await Profile.findByIdAndUpdate(participant_id, {
+        // add event to each participant's profile
+        await Promise.all(participants.map(async participant => {
+            await Profile.findByIdAndUpdate(participant, {
                 $push: {
                     events: {
                         eventId: savedEvent._id,
-                        status: 'pending'
+                        status: 'pending' 
                     }
                 }
             });
@@ -51,64 +44,88 @@ router.post('/event', authenticate, async (req, res) => {
 
         await Profile.findByIdAndUpdate(id, {
             $push: {
-                events: {
-                    eventId: savedEvent._id,
-                    status: 'accepted'
-                }
+            events: {
+                eventId: savedEvent._id,
+                status: 'accepted'
+            }
             }
         });
 
         res.status(201).json({
-            message: `Event successfully created by ${username} for ${participantIds.length} participants.`,
+            message: `Event successfully created by ${username} for ${participants.length} participants.`,
             event: savedEvent
         });
     } catch (error) {
         console.error('Error creating event:', error);
         res.status(500).send('Internal server error');
     }
-});
+    });
 
+    router.put('/event/respond', authenticate, async (req, res) => {
+    const userId = req.user.id;
+    const { eventId, status } = req.body;
 
+    if (!['accepted', 'rejected'].includes(status)) {
+        return res.status(400).send('Invalid status. Must be "accepted" or "rejected".');
+    }
 
-router.put('/event/respond', authenticate, async (req, res) => {
-  const userId = req.user.id;
-  const { eventId, status } = req.body;
+    try {
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).send('Event not found');
+        }
 
-  if (!['accepted', 'rejected'].includes(status)) {
-      return res.status(400).send('Invalid status. Must be "accepted" or "rejected".');
-  }
+        const participantIndex = event.participants.findIndex(p => p.participant_id.equals(userId) && p.status === 'pending');
+        if (participantIndex === -1) {
+            return res.status(400).send('No pending invitation found');
+        }
 
-  try {
-      const event = await Event.findById(eventId);
-      if (!event) {
-          return res.status(404).send('Event not found');
-      }
+        const user = await Profile.findById(userId);
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        const userEventIndex = user.events.findIndex(e => e.eventId.equals(eventId) && e.status === 'pending');
+        if (userEventIndex === -1) {
+            return res.status(400).send('No pending invitation found in user profile');
+        }
 
-      const participantIndex = event.participants.findIndex(p => p.participant_id.equals(userId) && p.status === 'pending');
-      if (participantIndex === -1) {
-          return res.status(400).send('No pending invitation found');
-      }
+        if (status === 'accepted') {
+            event.participants[participantIndex].status = 'accepted';
+            user.events[userEventIndex].status = 'accepted';
 
-      const user = await Profile.findById(userId);
-      if (!user) {
-          return res.status(404).send('User not found');
-      }
-      const userEventIndex = user.events.findIndex(e => e.eventId.equals(eventId) && e.status === 'pending');
-      if (userEventIndex === -1) {
-          return res.status(400).send('No pending invitation found in user profile');
-      }
+            const eventDay = event.date.toISOString().split('T')[0]; 
+            const dayOfWeek = new Date(eventDay).getDay();
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-      if (status === 'accepted') {
-        event.participants[participantIndex].status = 'accepted';
-        user.events[userEventIndex].status = 'accepted';
+            // Update schedule slots
+            for (let slot = event.start; slot <= event.end; slot++) {
+                user.schedule[dayNames[dayOfWeek]].slots[slot]++;
+            }
+        } else if (status === 'rejected') {
+            event.participants.splice(participantIndex, 1);
+            user.events.splice(userEventIndex, 1);
+        }
 
-        const eventDay = event.date.toISOString().split('T')[0]; 
-        const dayOfWeek = new Date(eventDay).getDay();
-        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        await event.save();
+        await user.save();
 
-        // Update schedule slots
-        for (let slot = event.start; slot <= event.end; slot++) {
-            user.schedule[dayNames[dayOfWeek]].slots[slot]++;
+        res.send(`Event invitation ${status}`);
+    } catch (error) {
+        console.error(`Error responding to event invitation:`, error);
+        res.status(500).send('Internal server error');
+    }
+    });
+
+    router.put('/event/:eventId', authenticate, async (req, res) => {
+    const { id } = req.user;  // Creator's ID from the authenticated user
+    const { title, description, participants, date, start, end } = req.body; // Data from the request body
+    const { eventId } = req.params; // Event ID from the URL
+
+    try {
+        // Fetch the existing event
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).send('Event not found');
         }
         if (event.creator.creatorId.toString() !== id) {
             return res.status(403).send('Not authorized to edit this event');
