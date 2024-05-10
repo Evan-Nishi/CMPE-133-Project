@@ -13,6 +13,7 @@ import profile from './routes/profile.js';
 import friends from './routes/friends.js';
 import schedule from './routes/schedule.js';
 import event from './routes/createEvent.js';
+import getEvent from './routes/getEvent.js';
 
 import Profile from './schemas/profile.js';
 
@@ -64,6 +65,7 @@ app.use(profile);
 app.use(friends);
 app.use(schedule);
 app.use(event);
+app.use(getEvent);
 
 app.listen(port, () => {
     console.log(`Express server listening on port: ${port}`);

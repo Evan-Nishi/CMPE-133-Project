@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-
 
 const tdStyle = {
     border: '1px solid black',
@@ -8,25 +7,13 @@ const tdStyle = {
     height: '20px' // Adjust the height value as needed
 };
 
+const Calendar = ({ schedule, events }) => {
+    // console.log(schedule);
+    // console.log('event:',events);
 
-const Calendar = ({schedule}) => {
-    //this gets tile background color, more red = more events scheduled during time
-    console.log(schedule)
 
-    /**
-     * TODO: fetch data here when API is complete
-     * for now use this example
-    */
-    let calData = {
-        "Sunday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-        "Monday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-        "Tuesday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-        "Wednesday":Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-        "Thursday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-        "Friday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-        "Saturday": Array.from({ length: 96 }, () => Math.floor(Math.random() * 4)),
-    };
-    return(
+
+    return (
         <table className="calendar-table">
             <thead>
                 <tr>
@@ -39,8 +26,8 @@ const Calendar = ({schedule}) => {
                     <th>Friday</th>
                     <th>Saturday</th>
                 </tr>
-            </thead>  
-            <CalBody calData={schedule}/>
+            </thead>
+            <CalBody calData={schedule} events={events} />
 
             <style>
                 {`
@@ -58,90 +45,102 @@ const Calendar = ({schedule}) => {
     );
 };
 
-//TODO: add col with time markers for each hr, ie 8:00am, 9:00am...
-const CalBody = ({calData}) =>{
-    let rows = [];
-    for(let i = 0; i < 96; i++){ //for each row
-        let isHrRow = (i % 4) == 0; //every block 15min, if it's 4th block then it's a row that is the start of an hour
-        rows.push( //we need to fix this, it's horrendous
-            <tr key={i} style={{ borderTop: `${isHrRow ? 5 : 1}px solid black` }}>
-                <CalTime timeBlocks={i}/>
-                <CalBlock  numEvents={calData["sunday"].slots[i]}/>
-                <CalBlock  numEvents={calData["monday"].slots[i]} />
-                <CalBlock  numEvents={calData["tuesday"].slots[i]} />
-                <CalBlock  numEvents={calData["wednesday"].slots[i]} />
-                <CalBlock  numEvents={calData["thursday"].slots[i]} />
-                <CalBlock  numEvents={calData["friday"].slots[i]} />
-                <CalBlock  numEvents={calData["saturday"].slots[i]} />
-            </tr>
-        );
-    }
-    return(
-        <tbody>
-            {rows}
-        </tbody>
-    )
+function getDayOfWeek(date) {
+    return new Date(date).getDay(); // Converts the date to a Date object and gets the day index
+}
+
+
+const CalBody = ({ calData, events }) => {
+    const timeSlots = 96; // Total time slots in a day
+    const weekSlots = Array.from({ length: 7 }, () => Array.from({ length: timeSlots }, () => ({ isStart: false, events: [] })));
+
+    // Distribute events into their respective slots
+    events.forEach(event => {
+        const dayIndex = getDayOfWeek(new Date(event.date)); // Determine day index
+        for (let i = event.start; i < event.end; i++) {
+            weekSlots[dayIndex][i].events.push(event);
+            if (i === event.start) {
+                weekSlots[dayIndex][i].isStart = true; // Mark the start of the event
+            }
+        }
+    });
+
+    // Render the slots into rows
+    const rows = weekSlots[0].map((_, slotIndex) => (
+        <tr key={slotIndex}>
+            <CalTime timeBlocks={slotIndex} />
+            {weekSlots.map((day, dayIndex) => {
+                const slot = day[slotIndex];
+                return (
+                    <CalBlock key={dayIndex} slot={slot} />
+                );
+            })}
+        </tr>
+    ));
+
+    return <tbody>{rows}</tbody>;
 };
 
-const CalTime =(props) => {//96 blocks of 15 min each
+
+
+
+
+const CalTime = (props) => {
     const nonHrStyle = {
         ...tdStyle,
         backgroundColor: 'white',
     }
 
-    if(props.timeBlocks % 4 == 0){ //it is hour row, get hour
+    if (props.timeBlocks % 4 === 0) {
         let hr = Math.floor(props.timeBlocks / 4);
         let timeStampStr = "";
 
-        //this is horrendous
-        if (hr == 0){
+        if (hr === 0) {
             timeStampStr = "12AM";
-        } else if (hr == 12){
+        } else if (hr === 12) {
             timeStampStr = "12PM";
         } else {
-            if(hr > 12){
+            if (hr > 12) {
                 timeStampStr = `${hr - 12}PM`;
             } else {
                 timeStampStr = `${hr}AM`;
             }
         }
-        return(
+        return (
             <td style={tdStyle}>
                 <b>{timeStampStr}</b>
             </td>
         )
     } else {
-        return(<td style={nonHrStyle}/>); //if it's not an hour block, no need to show formatting
+        return (<td style={nonHrStyle} />);
     }
 };
 
-
-
-const CalBlock = (props) => {
-    const tileBackground = (events) => {
-        if(events == -1){ //this is a permanent recurring block
-            return("rgb(128, 128, 128)");
-        } 
-
-        let gbVal = 255 - (55 * events);
-        if(gbVal < 0){ 
-            gbVal = 0;
-        }else if (gbVal > 255){//this should never happen
-            gbVal = 255;
-        }
-        return `rgb(255, ${gbVal}, ${gbVal})`;
-    }
-    
+const CalBlock = ({ slot }) => {
     const blockStyle = {
         ...tdStyle,
-        backgroundColor: tileBackground(props.numEvents)
+        backgroundColor: slot.events.length > 0 ? 'rgb(255, 200, 200)' : 'white'
     };
-    return(
-        <td style={blockStyle} />
-    )
+
+    return (
+        <td style={blockStyle}>
+            {slot.isStart && slot.events.map((event, index) => (
+                <div key={index} title={`Event: ${event.title} from slot ${event.start} to ${event.end}`}>
+                    {event.title}
+                </div>
+            ))}
+        </td>
+    );
 };
 
+
 Calendar.propTypes = {
-    profileID: PropTypes.string
+    schedule: PropTypes.object.isRequired,
+    events: PropTypes.arrayOf(PropTypes.shape({
+        start: PropTypes.number.isRequired,
+        end: PropTypes.number.isRequired,
+        title: PropTypes.string.isRequired,
+    })).isRequired
 };
+
 export default Calendar;

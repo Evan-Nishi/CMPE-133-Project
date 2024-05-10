@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAuthContext } from "../hook/useAuthContext";
+import { useAuthContext } from "../hook/userHook/useAuthContext";
 import { FaUserCircle, FaPaperclip } from "react-icons/fa";
+import useFriend from "../hook/friends/useFriend";
 import Calendar from "../Components/Calendar";
 import CreateEvent from "../Components/CreateEvent";
+import useGetEvent from "../hook/useGetEvent";
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
@@ -13,6 +15,8 @@ const UserProfile = () => {
   const { username } = useParams();
   const { user } = useAuthContext();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const { addFriend, invitationResponse } = useFriend();
+  const { eventsData, loading, error:eventsError, fetchEvents } = useGetEvent();
 
   const fetchUserProfile = async () => {
     try {
@@ -22,10 +26,21 @@ const UserProfile = () => {
       }
       const data = await response.json();
       setUserData(data);
+      console.log("User data: ", data);
+      if (data.events && data.events.length > 0) {
+        const eventIds = data.events.map(event => event.eventId);
+        fetchEvents(eventIds);
+        console.log("Event data: ", eventsData);  
+      }
+
+    
+    
+      
     } catch (error) {
       setError(error.message);
     }
   };
+
 
   const handleCopyUrl = () => {
     const url = window.location.href;
@@ -40,73 +55,13 @@ const UserProfile = () => {
   };
 
   const handleAddFriend = async () => {
-    if (!user) {
-      return;
-    }
-    try {
-      const friendId = userData.id;
-      const response = await fetch("/friends", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ friendId }),
-      });
-
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(`Failed to add friend: ${message}`);
-      }
-
-      const contentType = response.headers.get("Content-Type");
-      if (contentType && contentType.includes("application/json")) {
-        await response.json();
-      }
-
-      await fetchUserProfile();
-    } catch (error) {
-      console.error("Failed to add friend:", error);
-      alert(error.message); // Fixed typo here from `messxage` to `message`
-    }
+    await addFriend(userData.id);
+    await fetchUserProfile();
   };
 
   const handleInvitationResponse = async (response) => {
-    if (!userData || !user) {
-      console.log("Invalid operation. No user or userData available.");
-      return;
-    }
-    const friendId = userData.id;
-
-    try {
-      const result = await fetch("/friends", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          friendId: friendId,
-          status: response,
-        }),
-      });
-
-      if (!result.ok) {
-        const contentType = result.headers.get("Content-Type");
-        const errorText = await (contentType &&
-        contentType.includes("application/json")
-          ? result.json()
-          : result.text());
-        throw new Error(
-          `Failed to process the invitation response: ${errorText}`
-        );
-      }
-
-      await fetchUserProfile();
-    } catch (error) {
-      console.error("Error processing invitation response:", error);
-      console.log("Error processing your response. Please try again.");
-    }
+    await invitationResponse(userData.id, response);
+    await fetchUserProfile();
   };
 
   const updateFriendState = () => {
@@ -130,6 +85,7 @@ const UserProfile = () => {
     fetchUserProfile();
   }, [username]);
 
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -137,6 +93,8 @@ const UserProfile = () => {
   if (!userData) {
     return <div>Loading...</div>;
   }
+
+
 
   return (
     <div>
@@ -210,7 +168,7 @@ const UserProfile = () => {
           </div>
           <div className="flex w-full">
             <div className="flex-1">
-              <Calendar schedule={userData.schedule} />
+              <Calendar schedule={userData.schedule} events={eventsData} />
             </div>
             <div className="flex-1" style={{ maxHeight: "600px" }}>
               <CreateEvent />
