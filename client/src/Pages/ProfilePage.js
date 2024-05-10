@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "../hook/useAuthContext";
 import { FaUserCircle, FaPaperclip } from "react-icons/fa";
+import Calendar from "../Components/Calendar";
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
@@ -206,6 +207,7 @@ const UserProfile = () => {
                 ))}
             </div>
           </div>
+          <Calendar schedule={userData.schedule}/>
         </div>
       )}
     </div>
