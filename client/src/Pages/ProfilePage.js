@@ -4,6 +4,7 @@ import { useAuthContext } from "../hook/userHook/useAuthContext";
 import { FaUserCircle, FaPaperclip } from "react-icons/fa";
 import useFriend from "../hook/friends/useFriend";
 import Calendar from "../Components/Calendar";
+import useGetEvent from "../hook/useGetEvent";
 
 
 const UserProfile = () => {
@@ -15,7 +16,7 @@ const UserProfile = () => {
   const { user } = useAuthContext();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const { addFriend, invitationResponse } = useFriend();
-
+  const { eventsData, loading, error:eventsError, fetchEvents } = useGetEvent();
 
   const fetchUserProfile = async () => {
     try {
@@ -25,10 +26,21 @@ const UserProfile = () => {
       }
       const data = await response.json();
       setUserData(data);
+      console.log("User data: ", data);
+      if (data.events && data.events.length > 0) {
+        const eventIds = data.events.map(event => event.eventId);
+        fetchEvents(eventIds);
+        console.log("Event data: ", eventsData);  
+      }
+
+    
+    
+      
     } catch (error) {
       setError(error.message);
     }
   };
+
 
   const handleCopyUrl = () => {
     const url = window.location.href;
@@ -73,6 +85,7 @@ const UserProfile = () => {
     fetchUserProfile();
   }, [username]);
 
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -80,6 +93,8 @@ const UserProfile = () => {
   if (!userData) {
     return <div>Loading...</div>;
   }
+
+
 
   return (
     <div>
@@ -151,7 +166,8 @@ const UserProfile = () => {
                 ))}
             </div>
           </div>
-          <Calendar schedule={userData.schedule}/>
+          <Calendar schedule={userData.schedule} events={eventsData} />
+
         </div>
       )}
     </div>
