@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAuthContext } from "../hook/useAuthContext";
 import { FaUserCircle, FaPaperclip } from "react-icons/fa";
 import Calendar from "../Components/Calendar";
+import CreateEvent from "../Components/CreateEvent";
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
@@ -207,7 +208,14 @@ const UserProfile = () => {
                 ))}
             </div>
           </div>
-          <Calendar schedule={userData.schedule}/>
+          <div className="flex w-full">
+            <div className="flex-1">
+              <Calendar schedule={userData.schedule} />
+            </div>
+            <div className="flex-1" style={{ maxHeight: "600px" }}>
+              <CreateEvent />
+            </div>
+          </div>
         </div>
       )}
     </div>

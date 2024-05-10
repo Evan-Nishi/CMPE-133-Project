@@ -8,58 +8,67 @@ import { authenticate } from '../middleware/authenticate.js';
 const router = express.Router();
 
 router.post('/event', authenticate, async (req, res) => {
-  const { id, username } = req.user;
-  const { title, description, participants, date, start, end } = req.body;
+    const { id, username } = req.user;
+    const { title, description, participants, date, start, end } = req.body;
 
-  try {
-      const newEvent = new Event({
-          title,
-          description,
-          participants: participants.map(participant => ({
-              participant_id: participant,
-              status: 'pending' 
-          })),
-          date,
-          start,
-          end,
-          creator: {
-              creatorId: id, 
-              creatorName: username 
-          },
-      });
+    try {
+        const participantIds = await Promise.all(participants.map(async ({ username }) => {
+            const profile = await Profile.findOne({ username }).exec();
+            if (!profile) {
+                throw new Error(`No profile found for username: ${username}`);
+            }
+            return {
+                participant_id: profile._id,
+                status: 'pending'
+            };
+        }));
 
-      const savedEvent = await newEvent.save();
+        const newEvent = new Event({
+            title,
+            description,
+            participants: participantIds,
+            date,
+            start,
+            end,
+            creator: {
+                creatorId: id,
+                creatorName: username
+            },
+        });
 
-      // add event to each participant's profile
-      await Promise.all(participants.map(async participant => {
-          await Profile.findByIdAndUpdate(participant, {
-              $push: {
-                  events: {
-                      eventId: savedEvent._id,
-                      status: 'pending' 
-                  }
-              }
-          });
-      }));
+        const savedEvent = await newEvent.save();
 
-      await Profile.findByIdAndUpdate(id, {
-        $push: {
-          events: {
-            eventId: savedEvent._id,
-            status: 'accepted'
-          }
-        }
-      });
+        await Promise.all(participantIds.map(async ({ participant_id }) => {
+            await Profile.findByIdAndUpdate(participant_id, {
+                $push: {
+                    events: {
+                        eventId: savedEvent._id,
+                        status: 'pending'
+                    }
+                }
+            });
+        }));
 
-      res.status(201).json({
-          message: `Event successfully created by ${username} for ${participants.length} participants.`,
-          event: savedEvent
-      });
-  } catch (error) {
-      console.error('Error creating event:', error);
-      res.status(500).send('Internal server error');
-  }
+        await Profile.findByIdAndUpdate(id, {
+            $push: {
+                events: {
+                    eventId: savedEvent._id,
+                    status: 'accepted'
+                }
+            }
+        });
+
+        res.status(201).json({
+            message: `Event successfully created by ${username} for ${participantIds.length} participants.`,
+            event: savedEvent
+        });
+    } catch (error) {
+        console.error('Error creating event:', error);
+        res.status(500).send('Internal server error');
+    }
 });
+
+
 
 router.put('/event/respond', authenticate, async (req, res) => {
   const userId = req.user.id;
