@@ -6,16 +6,16 @@ const useProfile = (username) => {
   const fetchUserProfile = async (username) => {
     try {
       const response = await fetch(`/profile/${username}`, {
-        method: 'GET',
-        credentials: 'include',
+        method: "GET",
+        credentials: "include",
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        throw new Error("Failed to fetch user data");
       }
       const data = await response.json();
       setUserData(data);
     } catch (err) {
-      console.error('Error fetching user data:', err.message);
+      console.error("Error fetching user data:", err.message);
     }
   };
 
@@ -23,9 +23,9 @@ const useProfile = (username) => {
     if (username) {
       fetchUserProfile();
     }
-  }, [username]); 
+  }, [username]);
 
-  return {userData,fetchUserProfile};
+  return { userData, fetchUserProfile };
 };
 
 export default useProfile;

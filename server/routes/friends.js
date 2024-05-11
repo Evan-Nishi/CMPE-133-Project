@@ -16,12 +16,10 @@ router.post('/friends', authenticate, async (req, res) => {
             return res.status(404).send('User or friend not found');
         }
 
-        // Check if a pending or accepted friend request already exists
         if (user.friends.some(f => f.friend.equals(friendId))) {
             return res.status(400).send('Request already sent or already friends');
         }
         
-        // Add a pending request to both user's and friend's friend lists
         user.friends.push({
             friend: friendId,
             name: friend.username,
@@ -42,12 +40,10 @@ router.post('/friends', authenticate, async (req, res) => {
     }
 });
 
-
 router.put('/friends', authenticate, async (req, res) => {
     const userId = req.user.id;
     const { friendId, status } = req.body;
 
-    // Validate the status
     if (!['accepted', 'rejected'].includes(status)) {
         return res.status(400).send('Invalid status. Must be "accepted" or "rejected".');
     }
@@ -60,7 +56,6 @@ router.put('/friends', authenticate, async (req, res) => {
             return res.status(404).send('User or friend not found');
         }
 
-        // Find the friend request in both the user's and the friend's friend lists
         const userFriendRequestIndex = user.friends.findIndex(f => f.friend.equals(friendId) && f.status === 'pending');
         const friendRequestIndex = friend.friends.findIndex(f => f.friend.equals(userId) && f.status === 'invited');
 
@@ -69,11 +64,9 @@ router.put('/friends', authenticate, async (req, res) => {
         }
 
         if (status === 'accepted') {
-            // Update both sides to 'accepted' if the request is accepted
             user.friends[userFriendRequestIndex].status = 'accepted';
             friend.friends[friendRequestIndex].status = 'accepted';
         } else if (status === 'rejected') {
-            // Remove the friend request from both users if the request is rejected
             user.friends.splice(userFriendRequestIndex, 1);
             friend.friends.splice(friendRequestIndex, 1);
         }

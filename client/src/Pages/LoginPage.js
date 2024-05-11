@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Button from "../Components/Button";
-import { useLogin} from "../hook/userHook/useLogin"
+import { useLogin } from "../hook/userHook/useLogin";
 import { ToastContainer, toast } from "react-toastify";
 
 const Login = () => {
-  const {login, error} = useLogin()
+  const { login, error } = useLogin();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -24,24 +24,21 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.username || !formData.password) {
-        toast.error('Please fill in all fields');
-        return;
+      toast.error("Please fill in all fields");
+      return;
     }
 
     await login(formData.username, formData.password, formData.rememberMe);
-  
   };
 
   useEffect(() => {
-  if (error) {
-    toast.error(error);
-  }
-}, [error]);
-
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   return (
     <>
-  
       <div className="p-8">
         <h2 className="mb-4 font-bold text-3xl">Log In</h2>
         <form onSubmit={handleSubmit}>
@@ -95,9 +92,8 @@ const Login = () => {
             </Button>
           </div>
         </form>
-      <ToastContainer autoClose={3000} position="top-right" />
+        <ToastContainer autoClose={3000} position="top-right" />
       </div>
-      
     </>
   );
 };

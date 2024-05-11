@@ -24,7 +24,6 @@ router.post('/login', express.json(), async (req, res) => {
             sameSite: 'None',
             maxAge: maxAge,
         })
-        console.log('Successfully logged in as:', username);
         res.json({ message: 'Login successful!', username});
     } catch (error) {
         console.error('Login error: ', error);

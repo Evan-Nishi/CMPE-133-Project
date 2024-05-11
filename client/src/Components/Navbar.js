@@ -17,13 +17,11 @@ const Navbar = () => {
   const [invitationVisible, setInvitationVisible] = useState(false);
   const [eventInvitationVisible, setEventInvitationVisible] = useState(false);
   const [userData, setUserData] = useState(null);
-  const { eventsData, fetchEvents} = useGetEvent();
-  const [pendingEvents, setPendingEvents] = useState([])
+  const { eventsData, fetchEvents } = useGetEvent();
+  const [pendingEvents, setPendingEvents] = useState([]);
   const [isEventFormVisible, setIsEventFormVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventId, setSelectedEventId] = useState(null);
-
-
 
   useEffect(() => {
     if (user) {
@@ -36,13 +34,11 @@ const Navbar = () => {
       const pendingEvents = userData.events.filter(
         (event) => event.status === "pending"
       );
-      fetchEvents(pendingEvents.map((event) => event.eventId))
+      fetchEvents(pendingEvents.map((event) => event.eventId));
       setPendingEvents(pendingEvents);
-      console.log('Pending events:', pendingEvents);
-      console.log('user data:', userData);
     }
   }, [userData]);
-  
+
   const fetchUserData = async (username) => {
     try {
       const response = await fetch(`/profile/${username}`, {
@@ -64,7 +60,6 @@ const Navbar = () => {
     setInvitationVisible(false);
     logout();
   };
-  
 
   return (
     <nav className="bg-blue-300 flex flex-row justify-between items-center md:py-4 w-full">
@@ -107,11 +102,14 @@ const Navbar = () => {
             {isDropdownVisible && (
               <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
                 <ul className="py-1">
-                <a href={`/profile/${user.username}`} onClick={() => setIsDropdownVisible(false)}>
-                <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-                  User: {user.username}
-                </li>
-              </a>
+                  <a
+                    href={`/profile/${user.username}`}
+                    onClick={() => setIsDropdownVisible(false)}
+                  >
+                    <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+                      User: {user.username}
+                    </li>
+                  </a>
                   <li>
                     <Button
                       type="button"
@@ -151,7 +149,6 @@ const Navbar = () => {
                         >
                           <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
                             {friend.name}{" "}
-                            {/* Display friend ID for now as no name is available */}
                           </li>
                         </a>
                       ))
@@ -168,19 +165,22 @@ const Navbar = () => {
                       Your Event Invitations
                     </li>
                   )}
-                   {pendingEvents.length === 0 ? (
+                  {pendingEvents.length === 0 ? (
                     <li className="block px-4 py-2 text-sm text-black text-center font-bold">
                       No event invitations
                     </li>
                   ) : (
                     eventsData.map((event, index) => (
-                        <li key={index} className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold" 
-                          onClick={() => {
-                          setSelectedEvent(event); 
-                          setIsEventFormVisible(true); 
-                        }}>
-                          {event.title} 
-                        </li>
+                      <li
+                        key={index}
+                        className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold"
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setIsEventFormVisible(true);
+                        }}
+                      >
+                        {event.title}
+                      </li>
                     ))
                   )}
                 </ul>
@@ -189,7 +189,10 @@ const Navbar = () => {
           </div>
           {isEventFormVisible && (
             <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
-              <EventForm onClick={() => setIsEventFormVisible(!isEventFormVisible)} eventData={selectedEvent} />
+              <EventForm
+                onClick={() => setIsEventFormVisible(!isEventFormVisible)}
+                eventData={selectedEvent}
+              />
             </div>
           )}
         </div>

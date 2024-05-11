@@ -44,7 +44,6 @@ const CreateEvent = () => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log(result);
       } else {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {

@@ -22,14 +22,12 @@ router.post('/createAccount', express.json(), async (req, res) => {
         
         const login = await handleLogin(username, password, false);
         if (login.error) throw new Error(login.error);
-        console.log('hi')
         const maxAge = 24 * 60 * 60 * 1000; 
         res.cookie('jwt', login.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV !== 'development',
             maxAge: maxAge,
         });
-
         res.status(201).json({ message: 'Account created successfully', username});
     } catch (error) {
         res.status(400).json({ error: error.message });

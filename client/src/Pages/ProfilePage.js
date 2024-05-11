@@ -30,14 +30,11 @@ const UserProfile = () => {
         throw new Error("Failed to fetch user data");
       }
       const data = await response.json();
-      console.log("Profile data received:", data);
       setUserData(data);
-      // Immediately filter events for accepted status before fetching details
       if (data.events && data.events.length > 0) {
         const acceptedEventIds = data.events
           .filter((event) => event.status === "accepted")
           .map((event) => event.eventId);
-        console.log("Accepted event IDs to fetch:", acceptedEventIds);
         if (acceptedEventIds.length > 0) {
           await fetchEvents(acceptedEventIds);
         }
