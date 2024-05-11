@@ -13,7 +13,7 @@ const eventSchema = new Schema({
         participant_id: {
             type: Schema.Types.ObjectId,
             ref: 'Profile',
-            required: true,
+            required: false,
         },
         status: {
             type: String,
@@ -26,11 +26,11 @@ const eventSchema = new Schema({
         required: true,
     },
     start: {
-        type: Number, // 0-96, 0 is midnight, 96 is 11:45 PM
+        type: Number, // 0-96, representing quarter-hour intervals
         required: true,
     },
     end: {
-        type: Number, // 0-96, 0 is midnight, 96 is 11:45 PM
+        type: Number, // 0-96, representing quarter-hour intervals
         required: true,
     },
     creator: {

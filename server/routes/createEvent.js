@@ -11,16 +11,19 @@ async function hasTimeConflicts(userId, isoDate, startSlot, endSlot) {
     const profile = await Profile.findById(userId);
     if (!profile) {
         console.log("Profile not found for user:", userId);
-        return false;
+        return false; // No profile found
     }
 
-    const dateOfEvent = new Date(isoDate).setHours(0, 0, 0, 0); // Normalize the date
+    const dateOfEvent = new Date(isoDate);
+    dateOfEvent.setHours(0, 0, 0, 0); // Normalize the date
 
-    console.log(`Checking conflicts for user ${userId} on date ${isoDate} from slot ${startSlot} to ${endSlot}`);
     const conflicts = profile.events.some(event => {
-        const existingEventDate = new Date(event.date).setHours(0, 0, 0, 0);
+        const existingEventDate = new Date(event.date);
+        existingEventDate.setHours(0, 0, 0, 0);
 
-        if (dateOfEvent === existingEventDate) {
+        // Correct date comparison using getTime
+        if (dateOfEvent.getTime() === existingEventDate.getTime()) {
+            // Check for overlapping time slots
             const conflictExists = startSlot < event.end && endSlot > event.start;
             if (conflictExists) {
                 console.log(`Conflict found with event: ${event._id} from slot ${event.start} to ${event.end}`);
@@ -38,39 +41,45 @@ async function hasTimeConflicts(userId, isoDate, startSlot, endSlot) {
 }
 
 
+
 router.post('/event', authenticate, async (req, res) => {
     const { id, username } = req.user; // id is the creator's profile ID
     const { title, description, participants, date, start, end } = req.body;
 
     try {
-        const participantProfiles = await Promise.all(participants.map(async ({ username }) => {
-            const profile = await Profile.findOne({ username }).exec();
-            if (!profile) {
-                throw new Error(`No profile found for username: ${username}`);
-            }
-            if (await hasTimeConflicts(profile._id, date, start, end)) {
-                throw new Error(`Time conflict for user ${username}`);
-            }
-            return profile._id;
-        }));
+        let participantProfiles = [];
 
-        if (await hasTimeConflicts(id, date, start, end)) {
-            return res.status(409).send('Time conflict for event creator');
+        if (participants && participants.length > 0) {
+            // Ensure each participant has a non-empty username before attempting to find their profile
+            participantProfiles = await Promise.all(participants.filter(p => p.username.trim() !== '').map(async (p) => {
+                const profile = await Profile.findOne({ username: p.username.trim() }).exec();
+                if (!profile) {
+                    throw new Error(`No profile found for username: ${p.username}`);
+                }
+                if (await hasTimeConflicts(profile._id, date, start, end)) {
+                    throw new Error(`Time conflict for user ${p.username}`);
+                }
+                return {
+                    participant_id: profile._id,
+                    status: 'pending'
+                };
+            }));
         }
 
-        const uniqueParticipantIds = new Set(participantProfiles);
-        uniqueParticipantIds.add(id);
+        // Include the creator as a participant with 'accepted' status
+        participantProfiles.push({
+            participant_id: id,
+            status: 'accepted'
+        });
 
-        const participantsData = Array.from(uniqueParticipantIds).map(participantId => ({
-            participant_id: participantId,
-            status: participantId.toString() === id.toString() ? 'accepted' : 'pending'
-        }));
+        if (await hasTimeConflicts(id, date, start, end)) {
+            return res.status(409).send('Time conflict');
+        }
 
-        // Create the new event with the creator listed as a participant
         const newEvent = new Event({
             title,
             description,
-            participants: participantsData,
+            participants: participantProfiles,
             date,
             start,
             end,
@@ -82,27 +91,30 @@ router.post('/event', authenticate, async (req, res) => {
 
         const savedEvent = await newEvent.save();
 
-        // Update each participant's profile including the creator
-        await Promise.all(participantsData.map(async ({ participant_id, status }) => {
-            await Profile.findByIdAndUpdate(participant_id, {
-                $push: {
-                    events: {
-                        eventId: savedEvent._id,
-                        status: status
-                    }
+        // Optionally, update the creator's profile to include this event (if profiles track events)
+        await Profile.findByIdAndUpdate(id, {
+            $push: {
+                events: {
+                    eventId: savedEvent._id,
+                    status: 'accepted'
                 }
-            });
-        }));
+            }
+        });
 
         res.status(201).json({
-            message: `Event successfully created by ${username} for ${participantsData.length} participants.`,
+            message: `Event successfully created by ${username}.`,
             event: savedEvent
         });
-    } catch (error) {
+    } catch ( error) {
         console.error('Error creating event:', error);
         res.status(500).send('Internal server error');
     }
 });
+
+
+
+
+
 
 
 router.put('/event/respond', authenticate, async (req, res) => {
