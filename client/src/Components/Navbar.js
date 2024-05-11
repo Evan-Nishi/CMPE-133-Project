@@ -26,6 +26,7 @@ const Navbar = () => {
     }
   }, [user?.username]);
 
+
   useEffect(() => {
     if (userData) {
       const pendingEvents = userData.events.filter(
@@ -44,10 +45,8 @@ const Navbar = () => {
         method: "GET",
         credentials: "include",
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
       const data = await response.json();
+      console.log("Full user data fetched:", data);
       setUserData(data);
     } catch (err) {
       console.error("Error fetching user data:", err.message);
@@ -172,10 +171,50 @@ const Navbar = () => {
                           {event.title} {/* Display event ID */}
                         </li>
                     ))
+
                   )}
                 </ul>
               </div>
             )}
+            {eventInvitationVisible &&
+              userData &&
+              userData.events &&
+              (console.log("Event Data:", userData.events),
+              (
+                <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                  <ul className="py-1">
+                    {userData.events.filter(
+                      (event) => event.status === "pending"
+                    ).length > 0 && (
+                      <li className="block px-4 py-2 text-sm text-black text-center ">
+                        Your Event Invitations
+                      </li>
+                    )}
+                    {userData.events.filter(
+                      (event) => event.status === "pending"
+                    ).length === 0 ? (
+                      <li className="block px-4 py-2 text-sm text-black text-center font-bold">
+                        No event invitations
+                      </li>
+                    ) : (
+                      userData.events
+                        .filter((event) => event.status === "pending")
+                        .map((event, index) => (
+                          <a
+                            href={`/event/${event.id}`}
+                            onClick={() => setEventInvitationVisible(false)}
+                            key={index}
+                          >
+                            <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+                              {event.title} // Assuming the event object has a
+                              title
+                            </li>
+                          </a>
+                        ))
+                    )}
+                  </ul>
+                </div>
+              ))}
           </div>
         </div>
       )}

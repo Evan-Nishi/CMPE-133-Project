@@ -9,35 +9,38 @@ const router = express.Router();
 
 router.get('/profile/:username', authenticate, async (req, res) => {
   try {
-    const { username } = req.params;
+      const { username } = req.params;
+      const viewingUser = await Profile.findOne({ username }).exec();
+      
+      if (!viewingUser) { 
+          return res.status(404).json({ error: 'User not found' });
+      }
+      const events = await Event.find({
+          'participants.participant_id': viewingUser._id,
+          $or: [{ 'participants.status': 'accepted' }, { 'isPublic': true }]
+      }).exec();
 
-    const user = await Profile.findOne({ username }).exec();
-    
-    if (!user) { return res.status(404).json({ error: 'User not found' }) }
-
-    const events = await Event.find({
-      'participants.participant_id': user._id,
-    }).exec();
-    if (req.user.id === user._id.toString()) {
-      res.json({ 
-        id: user._id,
-        username: user.username,
-        schedule: user.schedule,
-        friends: user.friends,
-        events: user.events
-      });
-    } else {
-      res.json({ 
-        id: user._id,
-        username: user.username,
-        friends: user.friends
-      });
-    }
+      if (req.user.id === viewingUser._id.toString()) {
+          res.json({
+              id: viewingUser._id,
+              username: viewingUser.username,
+              schedule: viewingUser.schedule,
+              friends: viewingUser.friends,
+              events: events
+          });
+      } else {
+          res.json({
+              id: viewingUser._id,
+              username: viewingUser.username,
+              friends: viewingUser.friends,
+              events: events
+          });
+      }
   } catch (err) {
-    res.status(500).json({ error: 'Error', details: err.message });
+      res.status(500).json({ error: 'Error', details: err.message });
   }
-
 });
+
 
 router.post('/profile', authenticate, async (req, res) => {
   try {
