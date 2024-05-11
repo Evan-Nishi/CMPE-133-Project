@@ -10,8 +10,10 @@ const useEventRes = () => {
         setError(null);
         setResponse(null);
 
+        
+
         try {
-            const response = await fetch(`/event/${status}`, { // Changed single quotes to backticks
+            const response = await fetch(`/event/respond`, { // Changed single quotes to backticks
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -4,6 +4,8 @@ import 'dotenv/config';
 import Profile from '../schemas/profile.js';
 import Event from '../schemas/event.js';
 import { authenticate } from '../middleware/authenticate.js';
+import mongoose from 'mongoose';
+
 
 const router = express.Router();
 
@@ -133,17 +135,21 @@ router.post('/event', authenticate, async (req, res) => {
 router.put('/event/respond', authenticate, async (req, res) => {
 const userId = req.user.id;
 const { eventId, status } = req.body;
+const eventIdObject = new mongoose.Types.ObjectId(eventId);
+
+
+console.log('Event ID:', eventIdObject);
+console.log('status:', status);
 
 if (!['accepted', 'rejected'].includes(status)) {
     return res.status(400).send('Invalid status. Must be "accepted" or "rejected".');
 }
 
 try {
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(eventIdObject);
     if (!event) {
         return res.status(404).send('Event not found');
     }
-
     const participantIndex = event.participants.findIndex(p => p.participant_id.equals(userId) && p.status === 'pending');
     if (participantIndex === -1) {
         return res.status(400).send('No pending invitation found');

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuthContext } from "../hook/userHook/useAuthContext";
 import useEventRes from '../hook/useEventRes';
 const EventForm = ({ onClick, eventData }) => {
     const [isHidden, setIsHidden] = useState(false);
@@ -16,7 +15,6 @@ const EventForm = ({ onClick, eventData }) => {
             setEndTime(translateTime(eventData.end));
             setCreator(eventData.creator.creatorName);
             
-            
 
           
         }
@@ -28,24 +26,20 @@ const EventForm = ({ onClick, eventData }) => {
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [creator,setCreator] = useState(''); 
-    const { user } = useAuthContext();
     const {response, respondToEvent} = useEventRes();
 
-    const handleSubmit = async (status) => {
+    const handleSubmit =  (status) => {
       try {
           if (status === 'accepted') {
-              await respondToEvent(eventData._id, 'accepted');
+               respondToEvent(eventData._id, 'accepted');
           } else if (status === 'rejected') {
-              await respondToEvent(eventData._id, 'rejected');
+               respondToEvent(eventData._id, 'rejected');
           }
 
+          window.location.reload();
           console.log('Response:', response);
           
-          if (response.ok) {
-              console.log('Successful');
-          } else {
-              console.log('Failed');
-          }
+         
       } catch (error) {
           console.error('Error responding to event invitation:', error);
       }
@@ -108,7 +102,7 @@ const EventForm = ({ onClick, eventData }) => {
                 </div>
                 <div className="flex justify-center">
                     <button
-                        type="submit"
+                        type="button"
                         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-10 rounded mr-4"
                         onClick={() => handleSubmit('accepted')}
                     >
