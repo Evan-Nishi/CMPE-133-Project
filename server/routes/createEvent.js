@@ -7,23 +7,59 @@ import { authenticate } from '../middleware/authenticate.js';
 
 const router = express.Router();
 
+async function hasTimeConflicts(userId, isoDate, startSlot, endSlot) {
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+        console.log("Profile not found for user:", userId);
+        return false;
+    }
+
+    const dateOfEvent = new Date(isoDate).setHours(0, 0, 0, 0); // Normalize the date
+
+    console.log(`Checking conflicts for user ${userId} on date ${isoDate} from slot ${startSlot} to ${endSlot}`);
+    const conflicts = profile.events.some(event => {
+        const existingEventDate = new Date(event.date).setHours(0, 0, 0, 0);
+
+        if (dateOfEvent === existingEventDate) {
+            const conflictExists = startSlot < event.end && endSlot > event.start;
+            if (conflictExists) {
+                console.log(`Conflict found with event: ${event._id} from slot ${event.start} to ${event.end}`);
+            }
+            return conflictExists;
+        }
+        return false;
+    });
+
+    if (!conflicts) {
+        console.log("No conflicts found for user:", userId);
+    }
+
+    return conflicts;
+}
+
+
 router.post('/event', authenticate, async (req, res) => {
     const { id, username } = req.user; // id is the creator's profile ID
     const { title, description, participants, date, start, end } = req.body;
 
     try {
-        // Fetch all participant profiles and include the creator automatically as a participant
         const participantProfiles = await Promise.all(participants.map(async ({ username }) => {
             const profile = await Profile.findOne({ username }).exec();
             if (!profile) {
                 throw new Error(`No profile found for username: ${username}`);
             }
+            if (await hasTimeConflicts(profile._id, date, start, end)) {
+                throw new Error(`Time conflict for user ${username}`);
+            }
             return profile._id;
         }));
 
-        // Include the creator as a participant with 'accepted' status
+        if (await hasTimeConflicts(id, date, start, end)) {
+            return res.status(409).send('Time conflict for event creator');
+        }
+
         const uniqueParticipantIds = new Set(participantProfiles);
-        uniqueParticipantIds.add(id); // Ensure the creator is added and avoid duplicate entries
+        uniqueParticipantIds.add(id);
 
         const participantsData = Array.from(uniqueParticipantIds).map(participantId => ({
             participant_id: participantId,
@@ -105,7 +141,6 @@ try {
         const dayOfWeek = new Date(eventDay).getDay();
         const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-        // Update schedule slots
         for (let slot = event.start; slot <= event.end; slot++) {
             user.schedule[dayNames[dayOfWeek]].slots[slot]++;
         }
@@ -125,12 +160,11 @@ try {
 });
 
 router.put('/event/:eventId', authenticate, async (req, res) => {
-const { id } = req.user;  // Creator's ID from the authenticated user
-const { title, description, participants, date, start, end } = req.body; // Data from the request body
-const { eventId } = req.params; // Event ID from the URL
+const { id } = req.user;  
+const { title, description, participants, date, start, end } = req.body;
+const { eventId } = req.params;
 
 try {
-    // Fetch the existing event
     const event = await Event.findById(eventId);
     if (!event) {
         return res.status(404).send('Event not found');
@@ -139,14 +173,12 @@ try {
         return res.status(403).send('Not authorized to edit this event');
     }
 
-    // Update the event details
     event.title = title || event.title;
     event.description = description || event.description;
     event.date = date || event.date;
     event.start = start || event.start;
     event.end = end || event.end;
 
-    // Determine the new and removed participants
     const currentParticipantIds = event.participants.map(p => p.participant_id.toString());
     const newParticipants = participants.filter(p => !currentParticipantIds.includes(p));
     const existingParticipants = event.participants.filter(p => participants.includes(p.participant_id.toString()));
@@ -160,10 +192,8 @@ try {
         }))
     ];
 
-    // Save the updated event
     await event.save();
 
-    // Add the event to new participants' profiles
     await Promise.all(newParticipants.map(participant => {
         return Profile.findByIdAndUpdate(participant, {
             $push: {
@@ -175,7 +205,6 @@ try {
         });
     }));
 
-    // Remove the event from profiles of participants who are no longer part of the event
     const removedParticipants = currentParticipantIds.filter(p => !participants.includes(p));
     await Promise.all(removedParticipants.map(participant => {
         return Profile.findByIdAndUpdate(participant, {
