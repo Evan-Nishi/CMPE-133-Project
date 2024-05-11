@@ -32,10 +32,15 @@ const UserProfile = () => {
       const data = await response.json();
       console.log("Profile data received:", data);
       setUserData(data);
+      // Immediately filter events for accepted status before fetching details
       if (data.events && data.events.length > 0) {
-        const eventIds = data.events.map((event) => event.eventId);
-        console.log("Event IDs to fetch:", eventIds);
-        await fetchEvents(eventIds);
+        const acceptedEventIds = data.events
+          .filter((event) => event.status === "accepted")
+          .map((event) => event.eventId);
+        console.log("Accepted event IDs to fetch:", acceptedEventIds);
+        if (acceptedEventIds.length > 0) {
+          await fetchEvents(acceptedEventIds);
+        }
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -88,7 +93,9 @@ const UserProfile = () => {
 
   useEffect(() => {
     if (userData && userData.events) {
-      const eventIds = userData.events.map((event) => event.eventId);
+      const eventIds = userData.events
+        .filter((e) => e.status === "accepted")
+        .map((event) => event.eventId);
       fetchEvents(eventIds);
     }
   }, [userData]);
