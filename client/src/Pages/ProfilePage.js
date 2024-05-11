@@ -4,7 +4,8 @@ import { useAuthContext } from "../hook/userHook/useAuthContext";
 import { FaUserCircle, FaPaperclip } from "react-icons/fa";
 import useFriend from "../hook/friends/useFriend";
 import Calendar from "../Components/Calendar";
-
+import CreateEvent from "../Components/CreateEvent";
+import useGetEvent from "../hook/useGetEvent";
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
@@ -15,7 +16,12 @@ const UserProfile = () => {
   const { user } = useAuthContext();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const { addFriend, invitationResponse } = useFriend();
-
+  const {
+    eventsData,
+    loading,
+    error: eventsError,
+    fetchEvents,
+  } = useGetEvent();
 
   const fetchUserProfile = async () => {
     try {
@@ -25,7 +31,16 @@ const UserProfile = () => {
       }
       const data = await response.json();
       setUserData(data);
+      if (data.events && data.events.length > 0) {
+        const acceptedEventIds = data.events
+          .filter((event) => event.status === "accepted")
+          .map((event) => event.eventId);
+        if (acceptedEventIds.length > 0) {
+          await fetchEvents(acceptedEventIds);
+        }
+      }
     } catch (error) {
+      console.error("Error fetching profile:", error);
       setError(error.message);
     }
   };
@@ -72,6 +87,15 @@ const UserProfile = () => {
   useEffect(() => {
     fetchUserProfile();
   }, [username]);
+
+  useEffect(() => {
+    if (userData && userData.events) {
+      const eventIds = userData.events
+        .filter((e) => e.status === "accepted")
+        .map((event) => event.eventId);
+      fetchEvents(eventIds);
+    }
+  }, [userData]);
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -151,7 +175,14 @@ const UserProfile = () => {
                 ))}
             </div>
           </div>
-          <Calendar schedule={userData.schedule}/>
+          <div className="flex w-full">
+            <div className="flex-1">
+              <Calendar schedule={userData.schedule} events={eventsData} />
+            </div>
+            <div className="flex-1" style={{ maxHeight: "600px" }}>
+              {user.id === userData.id && <CreateEvent />}
+            </div>
+          </div>
         </div>
       )}
     </div>

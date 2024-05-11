@@ -1,6 +1,5 @@
 // endpoint to CRUD a user's own schedule
 import express from 'express';
-
 import Profile from '../schemas/profile.js';
 import { authenticate } from '../middleware/authenticate.js';
 
@@ -32,17 +31,16 @@ router.post('/schedule', authenticate, validateSchedule, async (req, res) => {
     const { id } = req.user;
     const { schedule } = req.body;
 
-    // Build the update object dynamically based on provided slots
     let updateOps = {};
     for (const day of Object.keys(schedule)) {
       schedule[day].slots.forEach(slotIndex => {
-        updateOps[`schedule.${day}.slots.${slotIndex}`] = 1; // Increment slot by 1
+        updateOps[`schedule.${day}.slots.${slotIndex}`] = 1;
       });
     }
 
     const updatedProfile = await Profile.findByIdAndUpdate(
         id,
-        { $inc: updateOps }, // Use the $inc operator with the built updateOps
+        { $inc: updateOps },
         { new: true }
     );
 

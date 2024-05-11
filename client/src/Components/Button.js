@@ -32,11 +32,11 @@ Button.propTypes = {
   children: PropTypes.node.isRequired,
   onClick: PropTypes.func,
   to: PropTypes.string,
-  type: PropTypes.oneOf(["button", "submit", "reset"]), // Add type prop
+  type: PropTypes.oneOf(["button", "submit", "reset"]),
 };
 
 Button.defaultProps = {
-  type: "button", // Default type is "button"
+  type: "button",
 };
 
 export default Button;
