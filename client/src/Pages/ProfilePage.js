@@ -7,7 +7,6 @@ import Calendar from "../Components/Calendar";
 import CreateEvent from "../Components/CreateEvent";
 import useGetEvent from "../hook/useGetEvent";
 
-
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
@@ -17,7 +16,12 @@ const UserProfile = () => {
   const { user } = useAuthContext();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const { addFriend, invitationResponse } = useFriend();
-  const { eventsData, loading, error:eventsError, fetchEvents } = useGetEvent();
+  const {
+    eventsData,
+    loading,
+    error: eventsError,
+    fetchEvents,
+  } = useGetEvent();
 
   const fetchUserProfile = async () => {
     try {
@@ -28,19 +32,14 @@ const UserProfile = () => {
       const data = await response.json();
       setUserData(data);
       console.log("User data: ", data);
-      if (data.events && data.events.length > 0) {
-        const eventIds = data.events.map(event => event.eventId);
-        console.log("Event IDs: ", eventIds); 
-        fetchEvents(eventIds);
-        console.log("Event data: ", eventsData);  
-      }
 
-      
+      if (data.events) {
+        console.log("Event data: ", data.events);
+      }
     } catch (error) {
       setError(error.message);
     }
   };
-
 
   const handleCopyUrl = () => {
     const url = window.location.href;
@@ -64,6 +63,18 @@ const UserProfile = () => {
     await fetchUserProfile();
   };
 
+  const handleEventResponse = async (eventId, response) => {
+    await fetch(`/event/respond`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
+      },
+      body: JSON.stringify({ eventId, status: response }),
+    });
+    fetchUserProfile();
+  };
+
   const updateFriendState = () => {
     if (userData && user) {
       const friendInfo = userData.friends?.find((f) => f.friend === user.id);
@@ -85,7 +96,6 @@ const UserProfile = () => {
     fetchUserProfile();
   }, [username]);
 
-
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -93,8 +103,6 @@ const UserProfile = () => {
   if (!userData) {
     return <div>Loading...</div>;
   }
-
-
 
   return (
     <div>
@@ -140,7 +148,7 @@ const UserProfile = () => {
                         setIsDropdownVisible((prevState) => !prevState)
                       }
                     >
-                      Invitation Received ↓
+                      Friend Invitation Received ↓
                     </div>
                     {isDropdownVisible && (
                       <div className="absolute w-full mt-2 bg-white border border-gray-200 rounded shadow-lg z-10">
@@ -168,13 +176,15 @@ const UserProfile = () => {
           </div>
           <div className="flex w-full">
             <div className="flex-1">
-              <Calendar schedule={userData.schedule} events={eventsData} />
+              <Calendar
+                schedule={userData.schedule}
+                events={userData.events || []}
+              />
             </div>
             <div className="flex-1" style={{ maxHeight: "600px" }}>
-              <CreateEvent />
+              {user.username === username && <CreateEvent />}
             </div>
           </div>
-
         </div>
       )}
     </div>
