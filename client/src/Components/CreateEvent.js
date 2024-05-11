@@ -13,6 +13,10 @@ const CreateEvent = () => {
     return hours * 4 + Math.floor(minutes / 15);
   };
 
+  const getLocalDate = (localDate) => {
+    return new Date(localDate + "T00:00:00");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const participantsArray = participants.split(",").map((username) => ({
@@ -24,7 +28,7 @@ const CreateEvent = () => {
       title,
       description,
       participants: participantsArray,
-      date,
+      date: getLocalDate(date).toISOString(),
       start: timeToIntervals(startTime),
       end: timeToIntervals(endTime),
     };

@@ -8,65 +8,66 @@ import { authenticate } from '../middleware/authenticate.js';
 const router = express.Router();
 
 router.post('/event', authenticate, async (req, res) => {
-const { id, username } = req.user;
-const { title, description, participants, date, start, end } = req.body;
+    const { id, username } = req.user; // id is the creator's profile ID
+    const { title, description, participants, date, start, end } = req.body;
 
-try {
-    const participantIds = await Promise.all(participants.map(async ({ username }) => {
-        const profile = await Profile.findOne({ username }).exec();
-        if (!profile) {
-            throw new Error(`No profile found for username: ${username}`);
-        }
-        return {
-            participant_id: profile._id,
-            status: 'pending'
-        };
-    }));
-
-    const newEvent = new Event({
-        title,
-        description,
-        participants: participantIds,
-        date,
-        start,
-        end,
-        creator: {
-            creatorId: id, 
-            creatorName: username 
-        },
-    });
-
-    const savedEvent = await newEvent.save();
-
-    await Promise.all(participantIds.map(async ({ participant_id }) => {
-        await Profile.findByIdAndUpdate(participant_id, {
-            $push: {
-                events: {
-                    eventId: savedEvent._id,
-                    status: 'pending'
-                }
+    try {
+        // Fetch all participant profiles and include the creator automatically as a participant
+        const participantProfiles = await Promise.all(participants.map(async ({ username }) => {
+            const profile = await Profile.findOne({ username }).exec();
+            if (!profile) {
+                throw new Error(`No profile found for username: ${username}`);
             }
+            return profile._id;
+        }));
+
+        // Include the creator as a participant with 'accepted' status
+        const uniqueParticipantIds = new Set(participantProfiles);
+        uniqueParticipantIds.add(id); // Ensure the creator is added and avoid duplicate entries
+
+        const participantsData = Array.from(uniqueParticipantIds).map(participantId => ({
+            participant_id: participantId,
+            status: participantId.toString() === id.toString() ? 'accepted' : 'pending'
+        }));
+
+        // Create the new event with the creator listed as a participant
+        const newEvent = new Event({
+            title,
+            description,
+            participants: participantsData,
+            date,
+            start,
+            end,
+            creator: {
+                creatorId: id,
+                creatorName: username
+            },
         });
-    }));
 
-    await Profile.findByIdAndUpdate(id, {
-        $push: {
-            events: {
-                eventId: savedEvent._id,
-                status: 'accepted'
-            }
-        }
-    });
+        const savedEvent = await newEvent.save();
 
-    res.status(201).json({
-        message: `Event successfully created by ${username} for ${participantIds.length} participants.`,
-        event: savedEvent
-    });
-} catch (error) {
-    console.error('Error creating event:', error);
-    res.status(500).send('Internal server error');
-}
+        // Update each participant's profile including the creator
+        await Promise.all(participantsData.map(async ({ participant_id, status }) => {
+            await Profile.findByIdAndUpdate(participant_id, {
+                $push: {
+                    events: {
+                        eventId: savedEvent._id,
+                        status: status
+                    }
+                }
+            });
+        }));
+
+        res.status(201).json({
+            message: `Event successfully created by ${username} for ${participantsData.length} participants.`,
+            event: savedEvent
+        });
+    } catch (error) {
+        console.error('Error creating event:', error);
+        res.status(500).send('Internal server error');
+    }
 });
+
 
 router.put('/event/respond', authenticate, async (req, res) => {
 const userId = req.user.id;

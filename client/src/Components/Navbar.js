@@ -8,8 +8,6 @@ import { FaUser, FaCalendar } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 import { RiMailSendFill } from "react-icons/ri";
 
-
-
 const Navbar = () => {
   const { logout } = useLogout();
   const { user } = useAuthContext();
@@ -20,22 +18,22 @@ const Navbar = () => {
 
   useEffect(() => {
     if (user) {
-      fetchUserData(user.username); 
+      fetchUserData(user.username);
     }
   }, [user?.username]);
   const fetchUserData = async (username) => {
     try {
       const response = await fetch(`/profile/${username}`, {
-        method: 'GET',
-        credentials: 'include', 
+        method: "GET",
+        credentials: "include",
       });
       if (!response.ok) {
         throw new Error("Failed to fetch user data");
       }
       const data = await response.json();
-      setUserData(data); 
+      setUserData(data);
     } catch (err) {
-      console.error('Error fetching user data:', err.message);
+      console.error("Error fetching user data:", err.message);
     }
   };
 
@@ -51,18 +49,26 @@ const Navbar = () => {
         <div className="text-left font-bold text-4xl">Fren2Meet</div>
       </Link>
       {user && (
-        <div className="flex flex-row items-center justify-end w-full">  
-          <div className="relative w-1/3 flex justify-end md:mr-12">  
-            <div onClick={() => {
-              setInvitationVisible(false); // Close invitation
-              setIsDropdownVisible((prevState) => !prevState); // Toggle dropdown visibility
-            }} className="mr-4 cursor-pointer">
-              <FaUser/>
-             </div>
-            <div onClick={() => {
-              setIsDropdownVisible(false); // Close dropdown
-              setInvitationVisible((prevState) => !prevState); // Toggle invitation visibility
-            }} className="cursor-pointer">
+        <div className="flex flex-row items-center justify-end w-full">
+          <div className="relative w-1/3 flex justify-end md:mr-12">
+            <div
+              onClick={() => {
+                setInvitationVisible(false);
+                setEventInvitationVisible(false);
+                setIsDropdownVisible((prevState) => !prevState);
+              }}
+              className="mr-4 cursor-pointer"
+            >
+              <FaUser />
+            </div>
+            <div
+              onClick={() => {
+                setIsDropdownVisible(false);
+                setEventInvitationVisible(false);
+                setInvitationVisible((prevState) => !prevState);
+              }}
+              className="cursor-pointer"
+            >
               <RiMailSendFill />
             </div>
             <div
