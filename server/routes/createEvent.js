@@ -91,6 +91,19 @@ router.post('/event', authenticate, async (req, res) => {
 
         const savedEvent = await newEvent.save();
 
+        await Promise.all(participantProfiles.map(async (participant) => {
+            if (participant.participant_id !== id) { // Avoid adding the event to the creator's profile again
+                await Profile.findByIdAndUpdate(participant.participant_id, {
+                    $push: {
+                        events: {
+                            eventId: savedEvent._id,
+                            status: participant.status
+                        }
+                    }
+                });
+            }
+        }));
+
         // Optionally, update the creator's profile to include this event (if profiles track events)
         await Profile.findByIdAndUpdate(id, {
             $push: {

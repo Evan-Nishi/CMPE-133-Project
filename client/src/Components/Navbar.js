@@ -7,7 +7,7 @@ import { useAuthContext } from "../hook//userHook/useAuthContext";
 import { FaUser, FaCalendar } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 import { RiMailSendFill } from "react-icons/ri";
-
+import useGetEvent from "../hook/useGetEvent";
 const Navbar = () => {
   const { logout } = useLogout();
   const { user } = useAuthContext();
@@ -15,12 +15,27 @@ const Navbar = () => {
   const [invitationVisible, setInvitationVisible] = useState(false);
   const [eventInvitationVisible, setEventInvitationVisible] = useState(false);
   const [userData, setUserData] = useState(null);
+  const { eventsData, fetchEvents} = useGetEvent();
+  const [pendingEvents, setPendingEvents] = useState([])  
+
+
 
   useEffect(() => {
     if (user) {
       fetchUserData(user.username);
     }
   }, [user?.username]);
+
+  useEffect(() => {
+    if (userData) {
+      const pendingEvents = userData.events.filter(
+        (event) => event.status === "pending"
+      );
+      fetchEvents(pendingEvents.map((event) => event.eventId))
+      console.log('Pending events:', eventsData);
+    }
+  }, [userData]);
+  
   const fetchUserData = async (username) => {
     try {
       const response = await fetch(`/profile/${username}`, {
@@ -148,26 +163,16 @@ const Navbar = () => {
                       Your Event Invitations
                     </li>
                   )}
-                  {userData.events.filter((event) => event.status === "pending")
-                    .length === 0 ? (
+                   {pendingEvents.length === 0 ? (
                     <li className="block px-4 py-2 text-sm text-black text-center font-bold">
                       No event invitations
                     </li>
                   ) : (
-                    userData.events
-                      .filter((event) => event.status === "pending")
-                      .map((event, index) => (
-                        <a
-                          href={`/event/${event.id}`} // Placeholder link
-                          onClick={() => setEventInvitationVisible(false)}
-                          key={index}
-                        >
-                          <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-                            {event.title} // Assuming the event object has a
-                            title
-                          </li>
-                        </a>
-                      ))
+                    eventsData.map((event, index) => (
+                        <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+                          {event.title} {/* Display event ID */}
+                        </li>
+                    ))
                   )}
                 </ul>
               </div>

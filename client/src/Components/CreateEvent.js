@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 const CreateEvent = () => {
   const [title, setTitle] = useState("");
@@ -44,7 +44,6 @@ const CreateEvent = () => {
 
       if (response.ok) {
         const result = await response.json();
-        alert("Event created successfully!");
         console.log(result);
       } else {
         const contentType = response.headers.get("content-type");
@@ -60,6 +59,7 @@ const CreateEvent = () => {
       console.error("Failed to create event:", error);
       alert(error.message);
     }
+    window.location.reload();
   };
 
   return (
@@ -73,6 +73,7 @@ const CreateEvent = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="border border-gray-400 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
+            required
           />
 
           <label className="mb-2">Description:</label>
@@ -80,6 +81,7 @@ const CreateEvent = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="border border-gray-400 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 w-full h-32"
+            required
           />
 
           <label className="mb-2">Participants (comma-separated):</label>
@@ -96,6 +98,7 @@ const CreateEvent = () => {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="border border-gray-400 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
+            required
           />
 
           <label className="mb-2">Start Time:</label>
@@ -104,6 +107,7 @@ const CreateEvent = () => {
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             className="border border-gray-400 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
+            required
           />
 
           <label className="mb-2">End Time:</label>
@@ -112,6 +116,7 @@ const CreateEvent = () => {
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             className="border border-gray-400 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 w-full"
+            required
           />
         </div>
         <button

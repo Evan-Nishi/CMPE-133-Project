@@ -29,10 +29,10 @@ const UserProfile = () => {
       setUserData(data);
       console.log("User data: ", data);
       if (data.events && data.events.length > 0) {
-        const eventIds = data.events.map(event => event.eventId);
-        console.log("Event IDs: ", eventIds); 
-        fetchEvents(eventIds);
-        console.log("Event data: ", eventsData);  
+        const acceptedEvents = data.events.filter(event => event.status === 'accepted');
+        const eventIds = acceptedEvents.map(event => event.eventId);
+        console.log("Accepted Event IDs: ", eventIds); 
+        await fetchEvents(eventIds);
       }
 
       
@@ -171,7 +171,7 @@ const UserProfile = () => {
               <Calendar schedule={userData.schedule} events={eventsData} />
             </div>
             <div className="flex-1" style={{ maxHeight: "600px" }}>
-              <CreateEvent />
+              {user.id === userData.id && (<CreateEvent />)}
             </div>
           </div>
 
