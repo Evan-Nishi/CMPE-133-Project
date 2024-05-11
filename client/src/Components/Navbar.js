@@ -32,7 +32,9 @@ const Navbar = () => {
         (event) => event.status === "pending"
       );
       fetchEvents(pendingEvents.map((event) => event.eventId))
-      console.log('Pending events:', eventsData);
+      setPendingEvents(pendingEvents);
+      console.log('Pending events:', pendingEvents);
+      console.log('Events data:', eventsData);
     }
   }, [userData]);
   
@@ -99,14 +101,11 @@ const Navbar = () => {
             {isDropdownVisible && (
               <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
                 <ul className="py-1">
-                  <Link
-                    to={`/profile/${user.username}`}
-                    onClick={() => setIsDropdownVisible(false)}
-                  >
-                    <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-                      User: {user.username}
-                    </li>
-                  </Link>
+                <a href={`/profile/${user.username}`} onClick={() => setIsDropdownVisible(false)}>
+                <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+                  User: {user.username}
+                </li>
+              </a>
                   <li>
                     <Button
                       type="button"
@@ -169,7 +168,7 @@ const Navbar = () => {
                     </li>
                   ) : (
                     eventsData.map((event, index) => (
-                        <li className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
+                        <li key={index} className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
                           {event.title} {/* Display event ID */}
                         </li>
                     ))
