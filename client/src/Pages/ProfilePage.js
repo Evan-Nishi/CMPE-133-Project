@@ -4,6 +4,7 @@ import { useAuthContext } from "../hook/userHook/useAuthContext";
 import { FaUserCircle, FaPaperclip } from "react-icons/fa";
 import useFriend from "../hook/friends/useFriend";
 import Calendar from "../Components/Calendar";
+import CreateEvent from "../Components/CreateEvent";
 import useGetEvent from "../hook/useGetEvent";
 
 
@@ -165,7 +166,14 @@ const UserProfile = () => {
                 ))}
             </div>
           </div>
-          <Calendar schedule={userData.schedule} events={eventsData} />
+          <div className="flex w-full">
+            <div className="flex-1">
+              <Calendar schedule={userData.schedule} events={eventsData} />
+            </div>
+            <div className="flex-1" style={{ maxHeight: "600px" }}>
+              <CreateEvent />
+            </div>
+          </div>
 
         </div>
       )}
