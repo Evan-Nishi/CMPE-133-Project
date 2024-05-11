@@ -1,7 +1,7 @@
 // SignUp.js
 import React, { useState, useEffect} from 'react';
 import Button from '../Components/Button';
-import { useSignup } from '../hook/useSignup';
+import { useSignup } from '../hook/userHook/useSignup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

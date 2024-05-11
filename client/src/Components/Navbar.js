@@ -2,11 +2,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Button from "./Button";
-import { useLogout } from "../hook/useLogout";
-import { useAuthContext } from "../hook/useAuthContext";
-import { FaUser, FaCalendar } from "react-icons/fa6";
+import { useLogout } from "../hook/userHook/useLogout";
+import { useAuthContext } from "../hook//userHook/useAuthContext";
+import { FaUser } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 import { RiMailSendFill } from "react-icons/ri";
+
+
 
 const Navbar = () => {
   const { logout } = useLogout();
@@ -18,23 +20,22 @@ const Navbar = () => {
 
   useEffect(() => {
     if (user) {
-      fetchUserData(user.username);
+      fetchUserData(user.username); 
     }
   }, [user?.username]);
-
   const fetchUserData = async (username) => {
     try {
       const response = await fetch(`/profile/${username}`, {
-        method: "GET",
-        credentials: "include",
+        method: 'GET',
+        credentials: 'include', 
       });
       if (!response.ok) {
         throw new Error("Failed to fetch user data");
       }
       const data = await response.json();
-      setUserData(data);
+      setUserData(data); 
     } catch (err) {
-      console.error("Error fetching user data:", err.message);
+      console.error('Error fetching user data:', err.message);
     }
   };
 
@@ -50,49 +51,18 @@ const Navbar = () => {
         <div className="text-left font-bold text-4xl">Fren2Meet</div>
       </Link>
       {user && (
-        <div className="flex flex-row items-center justify-end w-full">
-          {" "}
-          {/*change justify when add search bar*/}
-          {/* <div className="relative md:ml-12 md:w-3/4">
-            <form className=" flex justify-center ">  
-              <input
-                type="text"
-                id="friendSearch"
-                name="friendSearch"
-                placeholder= "Search"
-                className="rounded-lg px-4 py-1 border md:w-full"
-              />
-            </form>
-            <div className="absolute md:w-full mt-2 bg-white rounded-md shadow-lg">
-                <ul className="py-1">
-                  <li >
-                    ryan
-                  </li>
-                  <li>
-                    Johnny
-                  </li>
-                </ul>
-            </div>
-          </div> */}
-          <div className="relative w-1/3 flex justify-end md:mr-12">
-            <div
-              onClick={() => {
-                setInvitationVisible(false); // Close invitation
-                setEventInvitationVisible(false);
-                setIsDropdownVisible((prevState) => !prevState); // Toggle dropdown visibility
-              }}
-              className="mr-4 cursor-pointer"
-            >
-              <FaUser />
-            </div>
-            <div
-              onClick={() => {
-                setIsDropdownVisible(false); // Close dropdown
-                setEventInvitationVisible(false);
-                setInvitationVisible((prevState) => !prevState); // Toggle invitation visibility
-              }}
-              className="cursor-pointer"
-            >
+        <div className="flex flex-row items-center justify-end w-full">  
+          <div className="relative w-1/3 flex justify-end md:mr-12">  
+            <div onClick={() => {
+              setInvitationVisible(false); // Close invitation
+              setIsDropdownVisible((prevState) => !prevState); // Toggle dropdown visibility
+            }} className="mr-4 cursor-pointer">
+              <FaUser/>
+             </div>
+            <div onClick={() => {
+              setIsDropdownVisible(false); // Close dropdown
+              setInvitationVisible((prevState) => !prevState); // Toggle invitation visibility
+            }} className="cursor-pointer">
               <RiMailSendFill />
             </div>
             <div
