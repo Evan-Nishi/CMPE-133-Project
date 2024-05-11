@@ -7,7 +7,6 @@ import Calendar from "../Components/Calendar";
 import CreateEvent from "../Components/CreateEvent";
 import useGetEvent from "../hook/useGetEvent";
 
-
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
@@ -17,7 +16,12 @@ const UserProfile = () => {
   const { user } = useAuthContext();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const { addFriend, invitationResponse } = useFriend();
-  const { eventsData, loading, error:eventsError, fetchEvents } = useGetEvent();
+  const {
+    eventsData,
+    loading,
+    error: eventsError,
+    fetchEvents,
+  } = useGetEvent();
 
   const fetchUserProfile = async () => {
     try {
@@ -26,21 +30,23 @@ const UserProfile = () => {
         throw new Error("Failed to fetch user data");
       }
       const data = await response.json();
+      console.log("Profile data received:", data);
       setUserData(data);
-      console.log("User data: ", data);
+      // Immediately filter events for accepted status before fetching details
       if (data.events && data.events.length > 0) {
-        const acceptedEvents = data.events.filter(event => event.status === 'accepted');
-        const eventIds = acceptedEvents.map(event => event.eventId);
-        console.log("Accepted Event IDs: ", eventIds); 
-        await fetchEvents(eventIds);
+        const acceptedEventIds = data.events
+          .filter((event) => event.status === "accepted")
+          .map((event) => event.eventId);
+        console.log("Accepted event IDs to fetch:", acceptedEventIds);
+        if (acceptedEventIds.length > 0) {
+          await fetchEvents(acceptedEventIds);
+        }
       }
-
-      
     } catch (error) {
+      console.error("Error fetching profile:", error);
       setError(error.message);
     }
   };
-
 
   const handleCopyUrl = () => {
     const url = window.location.href;
@@ -85,6 +91,14 @@ const UserProfile = () => {
     fetchUserProfile();
   }, [username]);
 
+  useEffect(() => {
+    if (userData && userData.events) {
+      const eventIds = userData.events
+        .filter((e) => e.status === "accepted")
+        .map((event) => event.eventId);
+      fetchEvents(eventIds);
+    }
+  }, [userData]);
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -93,8 +107,6 @@ const UserProfile = () => {
   if (!userData) {
     return <div>Loading...</div>;
   }
-
-
 
   return (
     <div>
@@ -171,10 +183,9 @@ const UserProfile = () => {
               <Calendar schedule={userData.schedule} events={eventsData} />
             </div>
             <div className="flex-1" style={{ maxHeight: "600px" }}>
-              {user.id === userData.id && (<CreateEvent />)}
+              {user.id === userData.id && <CreateEvent />}
             </div>
           </div>
-
         </div>
       )}
     </div>

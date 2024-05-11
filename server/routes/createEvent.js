@@ -52,7 +52,6 @@ router.post('/event', authenticate, async (req, res) => {
         let participantProfiles = [];
 
         if (participants && participants.length > 0) {
-            // Ensure each participant has a non-empty username before attempting to find their profile
             participantProfiles = await Promise.all(participants.filter(p => p.username.trim() !== '').map(async (p) => {
                 const profile = await Profile.findOne({ username: p.username.trim() }).exec();
                 if (!profile) {
@@ -63,7 +62,7 @@ router.post('/event', authenticate, async (req, res) => {
                 }
                 return {
                     participant_id: profile._id,
-                    status: 'pending'
+                    status: 'pending' // Default to pending, not added to profile yet
                 };
             }));
         }
@@ -73,10 +72,6 @@ router.post('/event', authenticate, async (req, res) => {
             participant_id: id,
             status: 'accepted'
         });
-
-        if (await hasTimeConflicts(id, date, start, end)) {
-            return res.status(409).send('Time conflict');
-        }
 
         const newEvent = new Event({
             title,
@@ -93,34 +88,16 @@ router.post('/event', authenticate, async (req, res) => {
 
         const savedEvent = await newEvent.save();
 
-        await Promise.all(participantProfiles.map(async (participant) => {
-            if (participant.participant_id !== id) { // Avoid adding the event to the creator's profile again
-                await Profile.findByIdAndUpdate(participant.participant_id, {
-                    $push: {
-                        events: {
-                            eventId: savedEvent._id,
-                            status: participant.status
-                        }
-                    }
-                });
-            }
-        }));
-
-        // Optionally, update the creator's profile to include this event (if profiles track events)
+        // Only update the creator's profile with this event
         await Profile.findByIdAndUpdate(id, {
-            $push: {
-                events: {
-                    eventId: savedEvent._id,
-                    status: 'accepted'
-                }
-            }
+            $push: { events: { eventId: savedEvent._id, status: 'accepted' } }
         });
 
         res.status(201).json({
             message: `Event successfully created by ${username}.`,
             event: savedEvent
         });
-    } catch ( error) {
+    } catch (error) {
         console.error('Error creating event:', error);
         res.status(500).send('Internal server error');
     }
@@ -175,19 +152,22 @@ try {
         for (let slot = event.start; slot <= event.end; slot++) {
             user.schedule[dayNames[dayOfWeek]].slots[slot]++;
         }
-    } else if (status === 'rejected') {
-        event.participants.splice(participantIndex, 1);
-        user.events.splice(userEventIndex, 1);
+
+        if (status === 'accepted') {
+            event.participants[participantIndex].status = 'accepted';
+            await Profile.findByIdAndUpdate(userId, {
+                $push: { events: { eventId, status: 'accepted' } }
+            });
+        } else if (status === 'rejected') {
+            event.participants.splice(participantIndex, 1);
+        }
+
+        await event.save();
+        res.send(`Event invitation ${status}`);
+    } catch (error) {
+        console.error(`Error responding to event invitation:`, error);
+        res.status(500).send('Internal server error');
     }
-
-    await event.save();
-    await user.save();
-
-    res.send(`Event invitation ${status}`);
-} catch (error) {
-    console.error(`Error responding to event invitation:`, error);
-    res.status(500).send('Internal server error');
-}
 });
 
 router.put('/event/:eventId', authenticate, async (req, res) => {
