@@ -8,6 +8,8 @@ import { FaUser, FaCalendar } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 import { RiMailSendFill } from "react-icons/ri";
 import useGetEvent from "../hook/useGetEvent";
+import EventForm from "./EventForm";
+
 const Navbar = () => {
   const { logout } = useLogout();
   const { user } = useAuthContext();
@@ -16,7 +18,10 @@ const Navbar = () => {
   const [eventInvitationVisible, setEventInvitationVisible] = useState(false);
   const [userData, setUserData] = useState(null);
   const { eventsData, fetchEvents} = useGetEvent();
-  const [pendingEvents, setPendingEvents] = useState([])  
+  const [pendingEvents, setPendingEvents] = useState([])
+  const [isEventFormVisible, setIsEventFormVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEventId, setSelectedEventId] = useState(null);
 
 
 
@@ -34,7 +39,7 @@ const Navbar = () => {
       fetchEvents(pendingEvents.map((event) => event.eventId))
       setPendingEvents(pendingEvents);
       console.log('Pending events:', pendingEvents);
-      console.log('Events data:', eventsData);
+      console.log('user data:', userData);
     }
   }, [userData]);
   
@@ -59,6 +64,7 @@ const Navbar = () => {
     setInvitationVisible(false);
     logout();
   };
+  
 
   return (
     <nav className="bg-blue-300 flex flex-row justify-between items-center md:py-4 w-full">
@@ -168,8 +174,12 @@ const Navbar = () => {
                     </li>
                   ) : (
                     eventsData.map((event, index) => (
-                        <li key={index} className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold">
-                          {event.title} {/* Display event ID */}
+                        <li key={index} className="block px-4 py-2 text-sm text-black text-center hover:bg-lightBlue font-bold" 
+                          onClick={() => {
+                          setSelectedEvent(event); 
+                          setIsEventFormVisible(true); 
+                        }}>
+                          {event.title} 
                         </li>
                     ))
                   )}
@@ -177,6 +187,11 @@ const Navbar = () => {
               </div>
             )}
           </div>
+          {isEventFormVisible && (
+            <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+              <EventForm onClick={() => setIsEventFormVisible(!isEventFormVisible)} eventData={selectedEvent} />
+            </div>
+          )}
         </div>
       )}
 
