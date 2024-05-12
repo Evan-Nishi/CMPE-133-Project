@@ -1,7 +1,9 @@
 import { useAuthContext } from "./useAuthContext";
+import { useNavigate } from "react-router-dom";
 
 export const useLogout = () => {
   const { dispatch } = useAuthContext();
+  const navigate = useNavigate();
 
   const logout = async () => {
     try {
@@ -15,6 +17,7 @@ export const useLogout = () => {
 
       if (response.ok) {
         dispatch({ type: "LOGOUT" });
+        navigate("/");
       } else {
         console.error("Logout failed");
       }
