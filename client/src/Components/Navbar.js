@@ -4,9 +4,8 @@ import { Link } from "react-router-dom";
 import Button from "./Button";
 import { useLogout } from "../hook/userHook/useLogout";
 import { useAuthContext } from "../hook//userHook/useAuthContext";
-import { FaUser, FaCalendar } from "react-icons/fa6";
+import { FaUser, FaEnvelope, FaUserGroup } from "react-icons/fa6";
 import { useState, useEffect } from "react";
-import { RiMailSendFill } from "react-icons/ri";
 import useGetEvent from "../hook/useGetEvent";
 import EventForm from "./EventForm";
 
@@ -21,7 +20,6 @@ const Navbar = () => {
   const [pendingEvents, setPendingEvents] = useState([]);
   const [isEventFormVisible, setIsEventFormVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [selectedEventId, setSelectedEventId] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -71,13 +69,13 @@ const Navbar = () => {
           <div className="relative w-1/3 flex justify-end md:mr-12">
             <div
               onClick={() => {
+                setIsDropdownVisible(false);
                 setInvitationVisible(false);
-                setEventInvitationVisible(false);
-                setIsDropdownVisible((prevState) => !prevState);
+                setEventInvitationVisible((prevState) => !prevState);
               }}
               className="mr-4 cursor-pointer"
             >
-              <FaUser />
+              <FaEnvelope />
             </div>
             <div
               onClick={() => {
@@ -85,19 +83,19 @@ const Navbar = () => {
                 setEventInvitationVisible(false);
                 setInvitationVisible((prevState) => !prevState);
               }}
-              className="cursor-pointer"
+              className="mr-4 cursor-pointer"
             >
-              <RiMailSendFill />
+              <FaUserGroup />
             </div>
             <div
               onClick={() => {
-                setIsDropdownVisible(false);
                 setInvitationVisible(false);
-                setEventInvitationVisible((prevState) => !prevState);
+                setEventInvitationVisible(false);
+                setIsDropdownVisible((prevState) => !prevState);
               }}
               className="cursor-pointer"
             >
-              <FaCalendar />
+              <FaUser />
             </div>
             {isDropdownVisible && (
               <div className="absolute top-10 right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
