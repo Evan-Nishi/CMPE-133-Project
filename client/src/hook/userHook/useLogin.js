@@ -22,7 +22,7 @@ export const useLogin = () => {
       setError(json.error);
     } else {
       dispatch({ type: "LOGIN", payload: json });
-      navigate("/");
+      navigate("/home");
     }
   };
   return { login, error };
