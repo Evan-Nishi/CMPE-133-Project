@@ -202,13 +202,13 @@ const Navbar = () => {
         <div className="ml-auto flex flex-row justify-between items-center">
           <Button
             to="/login"
-            className="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded"
+            className="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded mr-4"
           >
             Log In
           </Button>
           <Button
             to="/signup"
-            className="bg-red-400 hover:bg-red-600 text-white font-bold py-2 px-6 rounded"
+            className="bg-red-400 hover:bg-red-600 text-white font-bold py-2 px-6 rounded mr-4"
           >
             Sign Up
           </Button>

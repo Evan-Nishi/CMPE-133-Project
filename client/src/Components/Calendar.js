@@ -120,7 +120,7 @@ const CalBlock = ({ slot }) => {
             key={index}
             title={`Event: ${event.title} from slot ${event.start} to ${event.end}`}
           >
-            {event.title}
+            {event.title} - {new Date(event.date).toLocaleDateString()}
           </div>
         ))}
     </td>
